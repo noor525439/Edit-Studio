@@ -1,4 +1,4 @@
-import { FileVideo, LogOut, User, ChevronDown, Compass, Home, Users, Sparkles } from 'lucide-react'
+import { FileVideo, LogOut, User, ChevronDown, Compass, Home, Workflow, Sparkles } from 'lucide-react'
 import React from 'react'
 import { Link, useNavigate, NavLink } from 'react-router-dom'
 import {
@@ -87,6 +87,10 @@ const Navbar = () => {
                         <NavLink to={getDashboardLink()} className={linkStyles}>
                             <Home size={15} strokeWidth={2.5} />
                             Dashboard
+                        </NavLink>
+                        <NavLink to={'/project-workspace'} className={linkStyles}>
+                            <Workflow size={15} strokeWidth={2.5} />
+                            Workspace
                         </NavLink>
 
                         {/* Editor Specific: Information Form Only */}

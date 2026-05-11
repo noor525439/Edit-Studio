@@ -1,0 +1,26 @@
+## Environment
+.env
+.env.*
+!.env.example
+
+## Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+## Build outputs
+dist/
+build/
+.vite/
+
+## OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+## Uploads
+uploads/
+

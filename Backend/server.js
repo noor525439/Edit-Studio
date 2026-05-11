@@ -2,12 +2,19 @@ import 'dotenv/config'
 import express from "express"
 import dbConnection from "./dbConnection.js"
 import userRoute from "./routes/userRoute.js"
+import workflowRoute from "./routes/workflowRoute.js"
+import usersApiRoute from "./routes/usersApiRoute.js"
 import cors from 'cors'
+import http from "http";
+import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
+import { setSocketServer, registerUserSocket, unregisterUserSocket } from "./utils/socket.js";
+import { stripeWebhook } from "./Controllers/workflowController.js";
 
 const app = express()
+const server = http.createServer(app);
 const Port = process.env.PORT || 3000
 import fs from 'fs';
-// Add this if it's not there
 app.use('/uploads', express.static('uploads'));
 const uploadDir = './uploads';
 
@@ -18,7 +25,6 @@ if (!fs.existsSync(uploadDir)) {
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
 
         if (origin === 'http://localhost:5173' || origin === 'http://localhost:5174') {
@@ -32,12 +38,51 @@ app.use(cors({
 
 }));
 
+app.post(
+    "/webhook/stripe",
+    express.raw({ type: "application/json" }),
+    stripeWebhook
+);
+
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 dbConnection()
 
-app.use('/user', userRoute)
 
-app.listen(Port, () => {
+app.use('/user', userRoute)
+app.use('/api/users', usersApiRoute)
+app.use('/workflow', workflowRoute)
+
+
+
+const io = new Server(server, {
+    cors: {
+        origin: ['http://localhost:5173', 'http://localhost:5174'],
+        credentials: true
+    }
+});
+setSocketServer(io);
+app.set('socketio', io);
+
+io.use((socket, next) => {
+    try {
+        const token = socket.handshake.auth?.token;
+        if (!token) return next(new Error("Missing token"));
+        const decoded = jwt.verify(token, process.env.SECREAT_KEY);
+        socket.userId = String(decoded.id);
+        return next();
+    } catch (error) {
+        return next(new Error("Invalid token"));
+    }
+});
+
+io.on("connection", (socket) => {
+    registerUserSocket(socket.userId, socket.id);
+    socket.on("disconnect", () => {
+        unregisterUserSocket(socket.id);
+    });
+});
+
+server.listen(Port, () => {
     console.log(`Server is running on the port ${Port}`);
 })

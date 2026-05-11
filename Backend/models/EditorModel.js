@@ -19,6 +19,7 @@ const EditorSchema = new mongoose.Schema(
     experience: { type: String, required: true },
     skills: { type: [String], required: true }, 
     bio: { type: String, required: true },
+    portfolioLinks: { type: [String], default: [] },
   },
   { timestamps: true }
 );

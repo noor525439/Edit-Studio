@@ -7,13 +7,14 @@ import jwt from "jsonwebtoken"
 import cloudinary from '../utils/cloudinary.js';
 import Editor from "../models/EditorModel.js";
 import fs from 'fs'; 
+import { Upload } from "../models/UploadModel.js";
 
 export const verification = async (req, res) => {
     try {
         const authHeadears = req.headers.authorization
         if (!authHeadears || !authHeadears.startsWith("Bearer ")) {
             return res.status(401).json({ success: false, message: "Authorization Token is missing" })
-            // return res.sen(ErrorCode(401, 'Authorization Token is missing'))
+
         }
         const token = authHeadears.split(" ")[1]
         let decoded;
@@ -451,7 +452,7 @@ export const updateEditorProfile = async (req, res) => {
 
         const userId = req.userId;
 
-        const { name, role, rate, status, experience, skills, bio } = req.body;
+        const { name, role, rate, status, experience, skills, bio, portfolioLinks } = req.body;
 
         if (!name || !role || !rate || !experience || !skills || !bio) {
             return res.status(400).json({
@@ -473,7 +474,10 @@ export const updateEditorProfile = async (req, res) => {
             status: status || "Available",
             experience,
             skills: skillsArray,
-            bio
+            bio,
+            portfolioLinks: Array.isArray(portfolioLinks)
+                ? portfolioLinks
+                : (portfolioLinks ? String(portfolioLinks).split(',').map((link) => link.trim()).filter(Boolean) : [])
         };
 
 
@@ -526,4 +530,134 @@ export const rejectEditor = async (req, res) => {
             error: error.message
         });
     }
+};
+
+export const searchUsers = async (req, res) => {
+    try {
+        const q = String(req.query.q || "").trim();
+        const role = String(req.query.role || "").trim().toLowerCase();
+        const limit = Math.min(Math.max(Number(req.query.limit || 8), 1), 20);
+
+        const filters = [];
+        if (q) {
+            filters.push({
+                username: { $regex: q, $options: "i" }
+            });
+        }
+        if (role) {
+            filters.push({
+                role: { $regex: `^${role}$`, $options: "i" }
+            });
+        }
+
+        const query = filters.length > 0 ? { $and: filters } : {};
+
+        const users = await User.find(query)
+            .select("username role avatar email")
+            .sort({ username: 1 })
+            .limit(limit);
+
+        return res.status(200).json({
+            success: true,
+            data: users
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const uploadFiles = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: "No files uploaded" });
+    }
+ 
+    const userId = req.userId;
+ 
+    const saved = await Promise.all(
+      req.files.map(async (file) => {
+        const isVideo = file.mimetype.startsWith("video/");
+        const uploadResult = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "chat_uploads",
+              resource_type: isVideo ? "video" : "image",
+              transformation: isVideo ? [] : [{ width: 1200, crop: "limit", quality: "auto" }],
+            },
+            (error, result) => {
+              if (result) resolve(result);
+              else reject(error);
+            }
+          );
+          stream.end(file.buffer);
+        });
+ 
+        const doc = await Upload.create({
+          url: uploadResult.secure_url,
+          publicId: uploadResult.public_id,
+          mediaType: isVideo ? "video" : "image",
+          originalName: file.originalname,
+          size: file.size,
+          uploadedBy: userId,
+        });
+ 
+        return {
+          _id: doc._id,
+          url: doc.url,
+          mediaType: doc.mediaType,
+          originalName: doc.originalName,
+          size: doc.size,
+        };
+      })
+    );
+ 
+    return res.status(200).json({
+      success: true,
+      message: "Files uploaded successfully",
+      data: saved,
+      url: saved[0]?.url,
+    });
+  } catch (err) {
+    console.error("[uploadFiles]", err);
+    return res.status(500).json({ success: false, message: err.message || "Upload failed" });
+  }
+};
+ 
+export const deleteFile = async (req, res) => {
+  try {
+    const { publicId } = req.params;
+    const userId = req.userId;
+ 
+    const doc = await Upload.findOne({ publicId });
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "File not found" });
+    }
+ 
+    if (String(doc.uploadedBy) !== String(userId)) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+ 
+    const resourceType = doc.mediaType === "video" ? "video" : "image";
+    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+    await doc.deleteOne();
+ 
+    return res.status(200).json({ success: true, message: "File deleted" });
+  } catch (err) {
+    console.error("[deleteFile]", err);
+    return res.status(500).json({ success: false, message: err.message || "Delete failed" });
+  }
+};
+ 
+export const getMyUploads = async (req, res) => {
+  try {
+    const userId = req.userId; 
+ 
+    const files = await Upload.find({ uploadedBy: userId })
+      .sort({ createdAt: -1 })
+      .select("url mediaType originalName size createdAt");
+ 
+    return res.status(200).json({ success: true, data: files });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
 };

@@ -2,39 +2,53 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Check, X, UserCircle, ShieldAlert, Users, Clock, DollarSign, Briefcase, FileText, ExternalLink } from 'lucide-react';
+import { 
+  Check, X, UserCircle, Users, Clock, DollarSign, Briefcase, 
+  FileText, ExternalLink, UserPlus, TrendingUp, Wallet, CheckCircle2 
+} from 'lucide-react';
 import { getData } from '@/context/UserContext';
 
 const AdminDashboard = () => {
   const { user, loading } = getData();
   const [pendingEditors, setPendingEditors] = useState([]);
   const [allProfiles, setAllProfiles] = useState([]);
+  const [commissionOverview, setCommissionOverview] = useState({
+    totals: { totalVolume: 0, totalAdminCommission: 0, totalEditorPayout: 0 },
+    payments: [],
+  });
   const [isFetching, setIsFetching] = useState(true);
 
   const getAuthHeader = useCallback(() => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
   }), []);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setIsFetching(true);
-      try {
-        const [pendingRes, profilesRes] = await Promise.all([
-          axios.get('http://localhost:3000/user/pending-editors', getAuthHeader()),
-          axios.get('http://localhost:3000/user/all-editors')
-        ]);
-        setPendingEditors(pendingRes.data.editors || []);
-        setAllProfiles(profilesRes.data.data || []);
-      } catch (err) {
-        toast.error("Failed to sync dashboard data");
-      } finally {
-        setIsFetching(false);
-      }
-    };
-    if (user?.role === 'admin') fetchDashboardData();
-  }, [user, getAuthHeader]);
+  const fetchDashboardData = useCallback(async () => {
+    setIsFetching(true);
+    try {
+      const [pendingRes, profilesRes, commissionRes] = await Promise.all([
+        axios.get('http://localhost:3000/user/pending-editors', getAuthHeader()),
+        axios.get('http://localhost:3000/user/all-editors', getAuthHeader()),
+        axios.get('http://localhost:3000/workflow/admin/commissions', getAuthHeader())
+      ]);
 
-  const handleAction = async (id, action) => {
+      setPendingEditors(pendingRes.data.editors || []);
+      setAllProfiles(profilesRes.data.data || []);
+      setCommissionOverview(commissionRes.data.data || {
+        totals: { totalVolume: 0, totalAdminCommission: 0, totalEditorPayout: 0 },
+        payments: [],
+      });
+    } catch (err) {
+      toast.error("Failed to sync dashboard data");
+    } finally {
+      setIsFetching(false);
+    }
+  }, [getAuthHeader]);
+
+  useEffect(() => {
+    if (user?.role === 'admin') fetchDashboardData();
+  }, [user, fetchDashboardData]);
+
+  const handleEditorAction = async (id, action) => {
     try {
       if (action === 'approve') {
         await axios.put(`http://localhost:3000/user/approve-editor/${id}`, {}, getAuthHeader());
@@ -43,165 +57,179 @@ const AdminDashboard = () => {
         await axios.delete(`http://localhost:3000/user/reject-editor/${id}`, getAuthHeader());
         toast.error("Request Rejected");
       }
-      setPendingEditors(prev => prev.filter(ed => ed._id !== id));
+      fetchDashboardData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Action failed");
+    }
+  };
+
+  const handlePaymentApprove = async (paymentId) => {
+    try {
+      const { data } = await axios.patch(
+        `http://localhost:3000/workflow/payments/${paymentId}/approve`,
+        {},
+        getAuthHeader()
+      );
+      if (data.success) {
+        toast.success("Payment Approved Successfully");
+        fetchDashboardData();
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Action failed");
+      toast.error(err.response?.data?.message || "Approval failed");
     }
   };
 
   if (loading) return <LoadingSpinner message="Securing Session..." />;
   if (!user || user.role !== "admin") return <Navigate to="/" />;
 
+  const pendingPayments = commissionOverview.payments?.filter(p => p.status === 'pending') || [];
+
   return (
-    <div className="p-6 md:p-12 bg-[#F8FAFC] min-h-screen font-sans">
-      <div className="max-w-4xl mx-auto flex flex-col gap-12">
+    <div className="min-h-screen bg-[#f8fafc]">
+      <div className="max-w-7xl mx-auto px-4 py-12">
         
-        <header className="text-center flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-4 bg-white border border-slate-200 px-4 py-1.5 rounded-full shadow-sm">
-            <ShieldAlert className="text-indigo-600" size={16} />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Secure Admin Terminal</span>
-          </div>
-          <h1 className="text-5xl font-black tracking-tight text-slate-900 mb-2">Management</h1>
-          <div className="flex gap-6 mt-4">
-             <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-                <Clock size={16} className="text-amber-500" /> {pendingEditors.length} Pending
-             </div>
-             <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-                <Users size={16} className="text-indigo-500" /> {allProfiles.length} Active
-             </div>
-          </div>
-        </header>
+        <div className="mb-10 text-center sm:text-left">
+          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Admin Control Panel</h1>
+          <p className="text-slate-500 mt-2 text-lg">Platform revenue and management overview</p>
+        </div>
 
-        <section>
-          <div className="flex items-center gap-3 mb-6 px-2">
-            <h2 className="text-lg font-bold text-slate-800">Priority Approvals</h2>
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
-          
-          {isFetching ? (
-            <div className="h-32 bg-white rounded-[2rem] animate-pulse border border-slate-100" />
-          ) : pendingEditors.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pendingEditors.map(editor => (
-                <PendingCard key={editor._id} editor={editor} onAction={handleAction} />
-              ))}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+          <StatCard label="Total Volume" value={commissionOverview.totals.totalVolume} icon={<TrendingUp size={22}/>} color="bg-emerald-50 text-emerald-600 border-emerald-100" />
+          <StatCard label="Admin Profit" value={commissionOverview.totals.totalAdminCommission} icon={<Wallet size={22}/>} color="bg-indigo-50 text-indigo-600 border-indigo-100" />
+          <StatCard label="Total Payouts" value={commissionOverview.totals.totalEditorPayout} icon={<DollarSign size={22}/>} color="bg-amber-50 text-amber-600 border-amber-100" />
+        </div>
+
+        <div className="space-y-12">
+
+          <section className="space-y-6">
+            <SectionHeader icon={<CheckCircle2 size={20} className="text-emerald-600"/>} title="Pending Payment Approvals" count={pendingPayments.length} />
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+              {pendingPayments.length === 0 ? (
+                <div className="p-16 text-center text-slate-400 font-medium">All clear! No pending payments.</div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {pendingPayments.map(payment => (
+                    <div key={payment._id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                      <div className="space-y-1">
+                        <p className="font-semibold text-slate-800">{payment.orderId?.projectTitle || "Project"}</p>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">{payment.method}</span>
+                          <span className="text-[11px] text-slate-400 font-medium">{new Date(payment.createdAt).toLocaleDateString('en-GB')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <span className="font-bold text-slate-900 text-lg">PKR {payment.totalAmount.toLocaleString()}</span>
+                        <button 
+                          onClick={() => handlePaymentApprove(payment._id)}
+                          className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-black transition-all shadow-sm hover:shadow-md"
+                        >
+                          Approve
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </section>
+          </section>
+          <section className="space-y-6">
+            <SectionHeader icon={<UserPlus size={20} className="text-amber-600"/>} title="Pending Editor Requests" count={pendingEditors.length} />
+            <div className="grid gap-4">
+              {pendingEditors.length === 0 ? (
+                <div className="p-16 bg-white border border-slate-200 rounded-2xl text-center text-slate-400 font-medium">No new editor applications to review.</div>
+              ) : (
+                pendingEditors.map(editor => (
+                  <PendingCard key={editor._id} editor={editor} onAction={handleEditorAction} />
+                ))
+              )}
+            </div>
+          </section>
 
-        <section>
-          <div className="flex items-center gap-3 mb-6 px-2">
-            <h2 className="text-lg font-bold text-slate-800">Active Directory</h2>
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
-          
-          <div className="flex flex-col gap-4">
-            {allProfiles.length === 0 ? (
-               <div className="text-center p-12 bg-white rounded-[2rem] border border-dashed border-slate-300 text-slate-400">
-                  No active profiles available in the roster.
-               </div>
-            ) : (
-              allProfiles.map(profile => (
-                <WideProfileRow key={profile._id} profile={profile} />
-              ))
-            )}
-          </div>
-        </section>
+          <section className="space-y-6">
+            <SectionHeader icon={<Users size={20} className="text-indigo-600"/>} title="Active Editor Directory" count={allProfiles.length} />
+            <div className="grid gap-4">
+              {allProfiles.length === 0 ? (
+                <div className="p-10 text-center text-slate-400">No editors registered yet.</div>
+              ) : (
+                allProfiles.map(profile => <WideProfileRow key={profile._id} profile={profile} />)
+              )}
+            </div>
+          </section>
 
+        </div>
       </div>
     </div>
   );
 };
 
-// --- Updated PendingCard with Document Link ---
-const PendingCard = ({ editor, onAction }) => {
-  // Replace backslashes with forward slashes fo
-  // 8r URL compatibility
-  const documentUrl = editor.document 
-    ? `http://localhost:3000/${editor.document.replace(/\\/g, '/')}` 
-    : null;
 
+const StatCard = ({ label, value, icon, color }) => (
+  <div className={`bg-white p-6 rounded-2xl border ${color} shadow-sm transition-transform hover:-translate-y-1`}>
+    <div className={`w-12 h-12 ${color.split(' ')[0]} ${color.split(' ')[1]} rounded-xl flex items-center justify-center mb-5 shadow-inner`}>{icon}</div>
+    <p className="text-2xl font-bold text-slate-900">PKR {Number(value || 0).toLocaleString()}</p>
+    <p className="text-[11px] font-medium text-slate-400 uppercase tracking-[0.1em] mt-1">{label}</p>
+  </div>
+);
+
+const SectionHeader = ({ icon, title, count }) => (
+  <div className="flex items-center gap-3 px-2">
+    <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm">{icon}</div>
+    <h2 className="text-2xl font-bold text-slate-800 tracking-tight">{title}</h2>
+    <span className="bg-slate-200 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">{count}</span>
+  </div>
+);
+
+const PendingCard = ({ editor, onAction }) => {
+  const documentUrl = editor.document ? `http://localhost:3000/${editor.document.replace(/\\/g, '/')}` : null;
   return (
-    <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-200 transition-all">
+    <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
       <div className="flex items-center gap-4">
-        <div className="h-10 w-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-sm">
-          {editor.username?.charAt(0).toUpperCase() || <UserCircle size={16} />}
-        </div>
-        <div className="flex flex-col">
-          <h3 className="font-bold text-slate-900 text-sm leading-tight">{editor.username}</h3>
-          <p className="text-[10px] text-slate-400 truncate max-w-[120px] mb-1">{editor.email}</p>
-          
-          {documentUrl ? (
-            <a 
-              href={documentUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[10px] text-indigo-600 font-bold hover:text-indigo-800 transition-colors w-fit"
-            >
-              <FileText size={12} /> View CV <ExternalLink size={10} />
+        <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xl font-bold shadow-lg uppercase">{editor.username?.charAt(0)}</div>
+        <div>
+          <h3 className="font-semibold text-slate-900">{editor.username}</h3>
+          <p className="text-xs text-slate-400 font-medium mb-2">{editor.email}</p>
+          {documentUrl && (
+            <a href={documentUrl} target="_blank" className="text-[11px] font-semibold text-indigo-600 flex items-center gap-1.5 hover:text-indigo-800 transition-colors">
+              <FileText size={14}/> VIEW IDENTITY DOCUMENT
             </a>
-          ) : (
-            <span className="text-[9px] text-amber-500 font-medium italic">No document found</span>
           )}
         </div>
       </div>
-      <div className="flex gap-1">
-        <button onClick={() => onAction(editor._id, 'reject')} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-          <X size={18} />
-        </button>
-        <button onClick={() => onAction(editor._id, 'approve')} className="p-2 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-          <Check size={18} />
-        </button>
+      <div className="flex gap-3">
+        <button onClick={() => onAction(editor._id, 'reject')} className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><X size={22}/></button>
+        <button onClick={() => onAction(editor._id, 'approve')} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Check size={22}/></button>
       </div>
     </div>
   );
 };
 
 const WideProfileRow = ({ profile }) => (
-  <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
-    <div className="flex items-center gap-6">
-      <div className="h-14 w-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-200">
-        <UserCircle size={28} />
+  <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between shadow-sm hover:border-indigo-100 transition-all">
+    <div className="flex items-center gap-5">
+      <div className="p-2 bg-slate-50 rounded-xl border border-slate-100">
+        <UserCircle size={32} className="text-slate-400" />
       </div>
       <div>
-        <div className="flex items-center gap-3 mb-1">
-          <h4 className="font-bold text-slate-900">{profile.username || profile.name}</h4>
-          <span className="bg-indigo-50 text-indigo-600 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-tighter italic">
-            {profile.role}
-          </span>
-        </div>
-        <div className="flex items-center gap-4 text-[11px] text-slate-500 font-medium">
-          <span className="flex items-center gap-1"><DollarSign size={12} className="text-green-500"/>{profile.rate || 0}/hr</span>
-          <span className="flex items-center gap-1 uppercase tracking-widest text-[9px]"><Briefcase size={12} className="text-slate-400"/>Exp: {profile.experience || 'N/A'}</span>
+        <h4 className="font-semibold text-slate-900">{profile.username || profile.name}</h4>
+        <div className="flex items-center gap-3 text-xs text-slate-500 font-medium mt-0.5">
+           <span className="flex items-center gap-1"><Briefcase size={12}/> {profile.experience || 'New'} Exp</span>
+           <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+           <span className="text-indigo-600">Active Editor</span>
         </div>
       </div>
     </div>
-    
-    <div className="flex flex-wrap gap-2 md:max-w-[200px] justify-end">
-      {profile.skills?.slice(0, 3).map((skill, i) => (
-        <span key={i} className="text-[10px] bg-slate-50 border border-slate-100 text-slate-500 px-3 py-1 rounded-full">
-          {skill}
-        </span>
-      )) || <span className="text-[10px] text-slate-300 italic">No skills listed</span>}
+    <div className="flex gap-2">
+      {profile.skills?.slice(0,3).map((s, i) => (
+        <span key={i} className="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 font-semibold uppercase tracking-wider border border-slate-50">{s}</span>
+      ))}
     </div>
-  </div>
-);
-
-const EmptyState = () => (
-  <div className="p-16 text-center bg-white rounded-[3rem] border border-slate-100 shadow-sm">
-    <div className="bg-slate-50 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
-      <Check className="text-green-500" size={32} />
-    </div>
-    <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Queue Clear</p>
   </div>
 );
 
 const LoadingSpinner = ({ message }) => (
-  <div className="h-screen flex flex-col items-center justify-center bg-[#F8FAFC] gap-4">
-    <div className="w-12 h-12 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">{message}</p>
+  <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+    <div className="w-12 h-12 border-[5px] border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
+    <p className="text-slate-900 text-sm mt-6 font-bold tracking-widest uppercase">{message}</p>
   </div>
 );
 

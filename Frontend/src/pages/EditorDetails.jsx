@@ -126,6 +126,30 @@ const EditorDetails = () => {
                             </div>
                         </div>
 
+                        <div>
+                            <div className="flex items-center gap-4 mb-6">
+                                <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Portfolio</h2>
+                                <div className="h-[2px] flex-1 bg-slate-100"></div>
+                            </div>
+                            <div className="space-y-2">
+                                {editor.portfolioLinks?.length ? (
+                                    editor.portfolioLinks.map((link, idx) => (
+                                        <a
+                                            key={`${link}-${idx}`}
+                                            href={link}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="block text-blue-600 text-sm font-medium hover:underline"
+                                        >
+                                            {link}
+                                        </a>
+                                    ))
+                                ) : (
+                                    <p className="text-slate-400 italic">No portfolio links shared yet.</p>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Footer CTA */}
                         <div className="p-10 bg-gradient-to-br from-slate-900 to-blue-950 rounded-[3rem] text-white relative overflow-hidden shadow-2xl">
                             <div className="relative z-10">

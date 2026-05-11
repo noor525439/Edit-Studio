@@ -3,8 +3,6 @@ import multer from "multer";
 import path from "path";
 const router = express.Router();
 
-// es jga problem tha  ap ko sirf ye change kerna tha bas ap ko mam  🙄🙄
-
 const upload = multer({ storage: multer.memoryStorage() });
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, "uploads/"),
@@ -40,7 +38,11 @@ import {
     getAllEditors,
     updateEditorProfile,
     getMyProfile,
-    rejectEditor
+    rejectEditor,
+    searchUsers,
+    uploadFiles,
+    deleteFile,
+    getMyUploads,
 } from '../Controllers/userController.js'
 
 import { isAuthenticated } from "../middleware/authenticated.js"
@@ -58,8 +60,11 @@ router.post('/upload-profile', isAuthenticated, upload.single('avatar'), uploadP
 router.post('/editor/update-profile', isAuthenticated, updateEditorProfile);
 router.get('/editor/me', isAuthenticated, getMyProfile);
 router.get('/all-editors', getAllEditors);
+router.get('/search', isAuthenticated, searchUsers);
 router.delete('/reject-editor/:id', isAuthenticated, rejectEditor)
 router.get('/pending-editors', isAuthenticated, getPendingEditors)
 router.put('/approve-editor/:id', isAuthenticated, approveEditor)
-
+router.post("/upload", isAuthenticated, upload.array("file", 10), uploadFiles);
+router.get("/upload/my", isAuthenticated, getMyUploads);
+router.delete("/upload/:publicId", isAuthenticated, deleteFile);
 export default router

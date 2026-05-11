@@ -27,6 +27,10 @@ import MasteryAcademy from "./pages/MasteryAcademy"
 import VoiceGenerator from "./pages/VoiceGenerator"
 import VideoToAudio from "./pages/VideoToAudio"
 import SpeechToAudio from "./pages/SpeechToAudio"
+import ProjectWorkspace from "./pages/ProjectWorkspace"
+import Checkout from "./pages/Checkout"
+import PaymentSuccess from "./pages/PaymentSuccess"
+import PaymentCancel from "./pages/PaymentCancel"
 
 const router = createBrowserRouter([
   {
@@ -125,6 +129,22 @@ const router = createBrowserRouter([
   , {
     path: '/speech-to-audio',
     element: <><SpeechToAudio /></>
+  }
+  , {
+    path: '/project-workspace',
+    element: <><Navbar /><ProjectWorkspace /></>
+  }
+  , {
+    path: '/checkout',
+    element: <><Navbar /><Checkout /></>
+  }
+  , {
+    path: '/payment-success',
+    element: <PaymentSuccess />
+  }
+  , {
+    path: '/payment-cancel',
+    element: <PaymentCancel />
   }
 ])
 
