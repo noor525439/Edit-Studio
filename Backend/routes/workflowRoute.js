@@ -2,7 +2,6 @@ import express from "express";
 import { isAuthenticated } from "../middleware/authenticated.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
 import {
-  getAdminChatMonitor,
   getAdminCommissionOverview,
   createOrder,
   createOrGetThread,
@@ -25,6 +24,31 @@ import {
   createCheckoutSession,
   approvePaymentManual
 } from "../Controllers/workflowController.js";
+import {
+  getOrderById,
+  publishOrder,
+  getMarketplaceTasks,
+  applyForProject,
+  instantHire,
+  updateProgressPercent,
+  createSubmission,
+  getSubmissions,
+  requestRevision,
+  confirmDelivery,
+  rateProject,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getAdminUsers,
+} from "../Controllers/projectWorkflowController.js";
+import {
+  getClientPublicProfile,
+  getOrderDetail,
+  addOrderComment,
+  browseEditors,
+  getPublicEditorProfile,
+  submitOrderReview,
+} from "../Controllers/profilesReviewsController.js";
 
 const router = express.Router();
 
@@ -58,5 +82,30 @@ router.get("/reviews", isAuthenticated, getReviews);
 router.post("/reviews", isAuthenticated, authorizeRole("client"), createReview);
 router.get("/gig/editor/:editorUserId", isAuthenticated, getEditorGigProfile);
 router.get("/admin/commissions", isAuthenticated, authorizeRole("admin"), getAdminCommissionOverview);
+router.get("/admin/users", isAuthenticated, authorizeRole("admin"), getAdminUsers);
+
+router.get("/marketplace", isAuthenticated, getMarketplaceTasks);
+router.get("/orders/:orderId", isAuthenticated, getOrderById);
+router.get("/orders/:orderId/detail", isAuthenticated, getOrderDetail);
+router.post("/orders/:orderId/comments", isAuthenticated, addOrderComment);
+router.post("/orders/:orderId/review", isAuthenticated, authorizeRole("client"), submitOrderReview);
+
+router.get("/clients/:clientId/profile", isAuthenticated, authorizeRole("editor", "admin"), getClientPublicProfile);
+router.get("/editors/browse", isAuthenticated, browseEditors);
+router.get("/editors/profile/:editorId", isAuthenticated, getPublicEditorProfile);
+router.post("/orders/:orderId/publish", isAuthenticated, authorizeRole("client"), publishOrder);
+router.put("/orders/:orderId/progress-percent", isAuthenticated, authorizeRole("editor"), updateProgressPercent);
+router.post("/orders/:orderId/apply", isAuthenticated, authorizeRole("editor"), applyForProject);
+router.post("/orders/:orderId/request-revision", isAuthenticated, authorizeRole("client"), requestRevision);
+router.post("/orders/:orderId/confirm-delivery", isAuthenticated, authorizeRole("client"), confirmDelivery);
+router.post("/orders/:orderId/rate", isAuthenticated, authorizeRole("client"), rateProject);
+router.post("/instant-hire", isAuthenticated, authorizeRole("client"), instantHire);
+
+router.post("/submissions", isAuthenticated, authorizeRole("editor"), createSubmission);
+router.get("/submissions", isAuthenticated, getSubmissions);
+
+router.get("/notifications", isAuthenticated, getNotifications);
+router.patch("/notifications/:notificationId/read", isAuthenticated, markNotificationRead);
+router.patch("/notifications/read-all", isAuthenticated, markAllNotificationsRead);
 
 export default router;

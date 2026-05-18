@@ -4,6 +4,7 @@ import dbConnection from "./dbConnection.js"
 import userRoute from "./routes/userRoute.js"
 import workflowRoute from "./routes/workflowRoute.js"
 import usersApiRoute from "./routes/usersApiRoute.js"
+import supportRoute from "./routes/supportRoute.js"
 import cors from 'cors'
 import http from "http";
 import { Server } from "socket.io";
@@ -52,6 +53,7 @@ dbConnection()
 app.use('/user', userRoute)
 app.use('/api/users', usersApiRoute)
 app.use('/workflow', workflowRoute)
+app.use('/api/support', supportRoute)
 
 
 
@@ -62,7 +64,7 @@ const io = new Server(server, {
     }
 });
 setSocketServer(io);
-app.set('socketio', io);
+app.set('io', io);
 
 io.use((socket, next) => {
     try {
@@ -78,6 +80,17 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
     registerUserSocket(socket.userId, socket.id);
+    
+    // Join user to their personal room
+    socket.join(`user_${socket.userId}`);
+    
+    // Join admin room if user is admin (you may need to fetch user role)
+    socket.on("join_admin_room", (role) => {
+        if (role === 'admin') {
+            socket.join('admin_room');
+        }
+    });
+    
     socket.on("disconnect", () => {
         unregisterUserSocket(socket.id);
     });

@@ -99,6 +99,18 @@ export const createOrder = async (req, res) => {
       revisionPolicyAgreed: Boolean(revisionPolicyAgreed),
       priorityLevel: priorityLevel || "Normal",
       autoPriceEstimate: Number(autoPriceEstimate || 0),
+      status: "draft",
+      progressPercent: 0,
+    });
+
+    const { logProjectActivity: logCreate } = await import("../utils/projectActivity.js");
+    await logCreate({
+      orderId: createdOrder._id,
+      actorId: currentUser._id,
+      actorName: currentUser.username,
+      actorRole: currentUser.role,
+      action: "project_created",
+      details: `Created project "${createdOrder.projectTitle}"`,
     });
 
     return res.status(201).json({ success: true, data: createdOrder });
@@ -863,9 +875,9 @@ export const getEditorGigProfile = async (req, res) => {
       ? Number((reviews.reduce((sum, item) => sum + item.rating, 0) / reviews.length).toFixed(1))
       : 0;
 
-    const completedTasks = await Task.countDocuments({
+    const completedTasks = await ProjectOrder.countDocuments({
       assignedEditorId: editorUserId,
-      timerStatus: "completed",
+      status: "completed",
     });
 
     const completedWithTime = await Task.find({

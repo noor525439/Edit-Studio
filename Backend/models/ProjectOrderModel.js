@@ -50,6 +50,25 @@ const projectOrderSchema = new mongoose.Schema(
     priorityLevel: { type: String, enum: ["Normal", "Urgent"], default: "Normal" },
     autoPriceEstimate: { type: Number, default: 0 },
     progressStage: { type: String, enum: progressStages, default: "Video Pending" },
+    status: {
+      type: String,
+      enum: [
+        "draft",
+        "published",
+        "project_started",
+        "in_progress",
+        "delivered",
+        "revision_requested",
+        "completed",
+      ],
+      default: "draft",
+    },
+    progressPercent: { type: Number, default: 0, min: 0, max: 100 },
+    revisionReason: { type: String, trim: true, default: "" },
+    deliveryConfirmed: { type: Boolean, default: false },
+    hireType: { type: String, enum: ["application", "instant_hire", ""], default: "" },
+    clientRating: { type: Number, min: 1, max: 5, default: null },
+    clientReviewText: { type: String, trim: true, default: "" },
   },
   { timestamps: true }
 );

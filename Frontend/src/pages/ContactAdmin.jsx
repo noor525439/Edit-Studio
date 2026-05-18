@@ -1,26 +1,118 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import emailjs from '@emailjs/browser';
+// Pehle wale import { UserContext } ko hata kar yeh likhein
+import { getData } from '../context/UserContext';
+import axios from 'axios';
 
 const ContactAdmin = () => {
   const navigate = useNavigate();
-  const formRef = useRef();
+  const { user } = getData() || {};
+  const fileInputRef = useRef();
   const [status, setStatus] = useState('idle');
-  const [formData, setFormData] = useState({ name: '', email: '', other_message: '' });
+  const [formData, setFormData] = useState({ 
+    senderName: '', 
+    senderEmail: '', 
+    subject: '',
+    message: '' 
+  });
+  const [attachments, setAttachments] = useState([]);
+  const [userRole, setUserRole] = useState('client');
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        senderName: user.firstName + ' ' + user.lastName || '',
+        senderEmail: user.email || ''
+      }));
+      setUserRole(user.role || 'client');
+    }
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const newFiles = files.map(file => ({
+      file,
+      name: file.name,
+      type: file.type,
+      size: file.size
+    }));
+    setAttachments(prev => [...prev, ...newFiles]);
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('loading');
-    emailjs.sendForm('service_glfjnjs', 'template_3cisn0q', formRef.current, 'AZL2sk8_nnNeGQVt5')
-      .then(() => {
+
+    try {
+      const submitData = {
+        senderName: formData.senderName,
+        senderEmail: formData.senderEmail,
+        senderRole: userRole,
+        subject: formData.subject,
+        message: formData.message,
+        attachments: []
+      };
+
+      // Handle file uploads
+      if (attachments.length > 0) {
+        const formDataWithFiles = new FormData();
+        formDataWithFiles.append('senderName', submitData.senderName);
+        formDataWithFiles.append('senderEmail', submitData.senderEmail);
+        formDataWithFiles.append('senderRole', submitData.senderRole);
+        formDataWithFiles.append('subject', submitData.subject);
+        formDataWithFiles.append('message', submitData.message);
+        
+        attachments.forEach(att => {
+          formDataWithFiles.append('files', att.file);
+        });
+
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/api/support/create`,
+          formDataWithFiles,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+          }
+        );
+
         setStatus('success');
-        setFormData({ name: '', email: '', other_message: '' });
-      }, () => setStatus('error'));
+      } else {
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/api/support/create`,
+          submitData,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            }
+          }
+        );
+
+        setStatus('success');
+      }
+
+      setFormData({ 
+        senderName: user?.firstName + ' ' + user?.lastName || '', 
+        senderEmail: user?.email || '',
+        subject: '',
+        message: '' 
+      });
+      setAttachments([]);
+    } catch (error) {
+      console.error('Error submitting support message:', error);
+      setStatus('error');
+    }
   };
 
   return (
@@ -36,7 +128,7 @@ const ContactAdmin = () => {
         onClick={() => navigate('/')} 
         className="absolute top-8 left-8 z-20 group flex items-center gap-3 py-2 px-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-slate-300 hover:text-white transition-all duration-300"
       >
-        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-indigo-500 transition-colors">
+        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-black group-hover:bg-indigo-500 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
           </svg>
@@ -68,69 +160,143 @@ const ContactAdmin = () => {
               </button>
             </div>
           ) : (
-            <form ref={formRef} onSubmit={handleSubmit} className="relative">
+            <form onSubmit={handleSubmit} className="relative">
               <header className="mb-12">
                 <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-[0.2em] uppercase mb-4">
-                  Contact Studio
+                  Support System
                 </div>
                 <h2 className="text-5xl font-black text-white tracking-tighter leading-none">
-                  Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">Touch.</span>
+                  Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">Support.</span>
                 </h2>
+                <p className="text-slate-400 mt-4">Your role: <span className="text-indigo-400 font-semibold capitalize">{userRole}</span></p>
               </header>
 
-              <div className="space-y-10">
-                {/* Field Group */}
-                {[
-                  { id: 'name', label: 'Full Name', type: 'text', name: 'from_name' },
-                  { id: 'email', label: 'Email Address', type: 'email', name: 'reply_to' }
-                ].map((field) => (
-                  <div key={field.id} className="relative group">
-                    <input
-                      type={field.type}
-                      id={field.id}
-                      name={field.name}
-                      placeholder=" "
-                      value={formData[field.id]}
-                      onChange={handleInputChange}
-                      className="peer w-full bg-transparent border-b border-white/10 py-3 text-white outline-none focus:border-indigo-400 transition-all duration-500"
-                      required
-                    />
-                    <label className="absolute left-0 top-3 text-slate-500 uppercase text-[10px] font-bold tracking-widest transition-all duration-500 peer-focus:-top-6 peer-focus:text-indigo-400 peer-[:not(:placeholder-shown)]:-top-6">
-                      {field.label}
-                    </label>
-                  </div>
-                ))}
+              <div className="space-y-6">
+                {/* Name Field */}
+                <div className="relative group">
+                  <input
+                    type="text"
+                    id="senderName"
+                    placeholder=" "
+                    value={formData.senderName}
+                    onChange={handleInputChange}
+                    disabled
+                    className="peer w-full bg-transparent border-b border-white/10 py-3 text-white outline-none disabled:text-slate-400 transition-all duration-500"
+                    required
+                  />
+                  <label className="absolute left-0 top-3 text-slate-500 uppercase text-[10px] font-bold tracking-widest transition-all duration-500 peer-focus:-top-6 peer-focus:text-indigo-400">
+                    Full Name
+                  </label>
+                </div>
+
+                {/* Email Field */}
+                <div className="relative group">
+                  <input
+                    type="email"
+                    id="senderEmail"
+                    placeholder=" "
+                    value={formData.senderEmail}
+                    onChange={handleInputChange}
+                    disabled
+                    className="peer w-full bg-transparent border-b border-white/10 py-3 text-white outline-none disabled:text-slate-400 transition-all duration-500"
+                    required
+                  />
+                  <label className="absolute left-0 top-3 text-slate-500 uppercase text-[10px] font-bold tracking-widest transition-all duration-500 peer-focus:-top-6 peer-focus:text-indigo-400">
+                    Email Address
+                  </label>
+                </div>
+
+                {/* Subject Field */}
+                <div className="relative group">
+                  <input
+                    type="text"
+                    id="subject"
+                    placeholder=" "
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    className="peer w-full bg-transparent border-b border-white/10 py-3 text-white outline-none focus:border-indigo-400 transition-all duration-500"
+                    required
+                  />
+                  <label className="absolute left-0 top-3 text-slate-500 uppercase text-[10px] font-bold tracking-widest transition-all duration-500 peer-focus:-top-6 peer-focus:text-indigo-400 peer-[:not(:placeholder-shown)]:-top-6">
+                    Subject
+                  </label>
+                </div>
 
                 {/* Message Field */}
                 <div className="relative group">
                   <textarea
-                    id="other_message"
-                    name="message"
-                    rows="3"
+                    id="message"
+                    rows="4"
                     placeholder=" "
-                    value={formData.other_message}
+                    value={formData.message}
                     onChange={handleInputChange}
                     className="peer w-full bg-transparent border-b border-white/10 py-3 text-white outline-none focus:border-indigo-400 transition-all duration-500 resize-none"
                     required
                   ></textarea>
                   <label className="absolute left-0 top-3 text-slate-500 uppercase text-[10px] font-bold tracking-widest transition-all duration-500 peer-focus:-top-6 peer-focus:text-indigo-400 peer-[:not(:placeholder-shown)]:-top-6">
-                    How can we help?
+                    Your Message
                   </label>
+                </div>
+
+                {/* File Upload */}
+                <div className="mt-8">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500/20 border border-indigo-500/50 rounded-lg text-indigo-300 hover:bg-indigo-500/30 transition-all"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Attach Files (Images, Videos, Docs)
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    onChange={handleFileChange}
+                    accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
+                    className="hidden"
+                  />
+
+                  {/* Attachments List */}
+                  {attachments.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {attachments.map((att, index) => (
+                        <div key={index} className="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10">
+                          <div className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            <span className="text-sm text-white">{att.name}</span>
+                            <span className="text-xs text-slate-400">({(att.size / 1024).toFixed(1)} KB)</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(index)}
+                            className="text-red-400 hover:text-red-300 transition-colors"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="mt-16">
+              <div className="mt-12">
                 <button 
                   type="submit" 
                   disabled={status === 'loading'}
-                  className="w-full group relative flex items-center justify-center gap-3 h-16 bg-white text-[#0f172a] rounded-2xl font-black text-lg overflow-hidden transition-all duration-500 hover:gap-6 active:scale-95 disabled:bg-slate-700"
+                  className="w-full group relative flex items-center justify-center gap-3 h-14 bg-white text-[#0f172a] rounded-xl font-bold text-base overflow-hidden transition-all duration-500 hover:gap-4 active:scale-95 disabled:bg-slate-700"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <span className="relative z-10 group-hover:text-white transition-colors">
-                    {status === 'loading' ? 'Encrypting...' : 'Dispatch Message'}
+                    {status === 'loading' ? 'Sending...' : 'Send Support Request'}
                   </span>
-                  {!status === 'loading' && (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 relative z-10 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {status !== 'loading' && (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 relative z-10 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   )}
