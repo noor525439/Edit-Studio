@@ -29,6 +29,8 @@ import {
   publishOrder,
   getMarketplaceTasks,
   applyForProject,
+  acceptApplication,
+  rejectApplication,
   instantHire,
   updateProgressPercent,
   createSubmission,
@@ -61,7 +63,7 @@ router.put(
   updateOrderProgress
 );
 
-router.post("/tasks", isAuthenticated, authorizeRole("client", "admin"), createTask);
+router.post("/tasks", isAuthenticated, authorizeRole("client", "admin", "editor"), createTask);
 router.get("/tasks", isAuthenticated, getTasks);
 router.put("/tasks/:taskId/timer", isAuthenticated, authorizeRole("editor"), updateTaskTimer);
 
@@ -96,6 +98,8 @@ router.get("/editors/profile/:editorId", isAuthenticated, getPublicEditorProfile
 router.post("/orders/:orderId/publish", isAuthenticated, authorizeRole("client"), publishOrder);
 router.put("/orders/:orderId/progress-percent", isAuthenticated, authorizeRole("editor"), updateProgressPercent);
 router.post("/orders/:orderId/apply", isAuthenticated, authorizeRole("editor"), applyForProject);
+router.post("/orders/:orderId/accept-application", isAuthenticated, authorizeRole("client"), acceptApplication);
+router.post("/orders/:orderId/reject-application", isAuthenticated, authorizeRole("client"), rejectApplication);
 router.post("/orders/:orderId/request-revision", isAuthenticated, authorizeRole("client"), requestRevision);
 router.post("/orders/:orderId/confirm-delivery", isAuthenticated, authorizeRole("client"), confirmDelivery);
 router.post("/orders/:orderId/rate", isAuthenticated, authorizeRole("client"), rateProject);

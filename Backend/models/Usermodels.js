@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String },
     googleId: { type: String },
     avatar: { type: String },
+    phone: { type: String, default: "" },
     role: { type: String, enum: ['admin', 'editor', 'freelancer', 'client'], default: 'freelancer' },
     adminWalletBalance: { type: Number, default: 0, min: 0 },
     editorPendingBalance: { type: Number, default: 0 },

@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import RoleGuard from "@/components/RoleGuard";
 import HireNowModal from "@/components/HireNowModal";
 import { CLIENT_ROLES } from "@/lib/roles";
-import { API_BASE } from "@/lib/api";
+import { apiGet, WORKFLOW_API } from "@/lib/api";
 
 const ClientHire = () => {
   const { editorId } = useParams();
@@ -13,10 +12,12 @@ const ClientHire = () => {
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
-    axios.get(`${API_BASE}/user/all-editors`).then((res) => {
-      const ed = res.data.data?.find((e) => e._id === editorId);
-      if (ed) setEditorName(ed.name);
-    });
+    apiGet(`${WORKFLOW_API}/editors/profile/${editorId}`)
+      .then((res) => {
+        const name = res.data.data?.editorProfile?.name || res.data.data?.user?.username;
+        if (name) setEditorName(name);
+      })
+      .catch(() => {});
   }, [editorId]);
 
   return (

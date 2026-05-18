@@ -14,7 +14,7 @@ import {
 const API_BASE = "http://localhost:3000/workflow";
 
 const TaskManager = ({ orders, tasks, editors, onSuccess, getAuthHeader, currentUserRole }) => {
-  const [form, setForm] = useState({ orderId: "", assignedEditorId: "", title: "" });
+  const [form, setForm] = useState({ orderId: "", assignedEditorId: "", title: "", estimatedDuration: 60 });
   const [localTasks, setLocalTasks] = useState([]);
 
   const fmt = (sec) => {
@@ -109,7 +109,7 @@ const TaskManager = ({ orders, tasks, editors, onSuccess, getAuthHeader, current
               if (!canCreateTask) return toast.error("Unauthorized");
               if (!form.title || !form.orderId) return toast.error("Fill details");
               await axios.post(`${API_BASE}/tasks`, form, getAuthHeader());
-              setForm({ orderId: "", assignedEditorId: "", title: "" });
+              setForm({ orderId: "", assignedEditorId: "", title: "", estimatedDuration: 60 });
               onSuccess();
               toast.success("Task Deployed Successfully");
             }}

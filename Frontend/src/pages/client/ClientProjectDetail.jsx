@@ -69,6 +69,26 @@ const ClientProjectDetail = () => {
     }
   };
 
+  const acceptApplication = async (applicationId) => {
+    try {
+      await apiPost(`${WORKFLOW_API}/orders/${id}/accept-application`, { applicationId });
+      toast.success("Editor hired — project started!");
+      load();
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to accept application");
+    }
+  };
+
+  const rejectApplication = async (applicationId) => {
+    try {
+      await apiPost(`${WORKFLOW_API}/orders/${id}/reject-application`, { applicationId });
+      toast.success("Application rejected");
+      load();
+    } catch (e) {
+      toast.error(e?.response?.data?.message || "Failed to reject application");
+    }
+  };
+
   return (
     <RoleGuard allowedRoles={CLIENT_ROLES}>
       <TaskDetailView
@@ -88,6 +108,8 @@ const ClientProjectDetail = () => {
         setReviewText={setReviewText}
         onSubmitReview={submitRating}
         onCommentPosted={load}
+        onAcceptApplication={acceptApplication}
+        onRejectApplication={rejectApplication}
       />
     </RoleGuard>
   );

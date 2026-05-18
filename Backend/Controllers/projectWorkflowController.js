@@ -161,14 +161,14 @@ export const getMarketplaceTasks = async (req, res) => {
         status: "published",
         assignedEditorId: null,
       })
-        .populate("clientId", "username email")
+        .populate("clientId", "username email avatar phone")
         .sort({ createdAt: -1 });
 
       const mine = await ProjectOrder.find({
         assignedEditorId: currentUser._id,
         status: { $nin: ["draft", "completed"] },
       })
-        .populate("clientId", "username email")
+        .populate("clientId", "username email avatar phone")
         .sort({ updatedAt: -1 });
 
       orders = [...mine, ...published];
@@ -184,6 +184,145 @@ export const getMarketplaceTasks = async (req, res) => {
     }
 
     return res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** Assign editor from a pending application and start the project workflow. */
+export const acceptApplication = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (!isClientRole(currentUser.role)) {
+      return res.status(403).json({ success: false, message: "Only clients can accept applications" });
+    }
+
+    const { applicationId } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+      return res.status(400).json({ success: false, message: "Invalid application" });
+    }
+
+    const application = await ProjectApplication.findById(applicationId).populate("editorId", "username email");
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Application not found" });
+    }
+
+    const order = await ProjectOrder.findById(application.orderId);
+    if (!order) return res.status(404).json({ success: false, message: "Project not found" });
+    if (String(order.clientId) !== String(currentUser._id)) {
+      return res.status(403).json({ success: false, message: "Not your project" });
+    }
+    if (order.assignedEditorId) {
+      return res.status(400).json({ success: false, message: "An editor is already assigned" });
+    }
+    if (application.status !== "pending") {
+      return res.status(400).json({ success: false, message: "Application is no longer pending" });
+    }
+
+    const editorId = application.editorId._id || application.editorId;
+    order.assignedEditorId = editorId;
+    order.status = "project_started";
+    order.hireType = "application";
+    order.progressPercent = order.progressPercent || 0;
+    await order.save();
+
+    application.status = "accepted";
+    await application.save();
+
+    await ProjectApplication.updateMany(
+      { orderId: order._id, _id: { $ne: application._id }, status: "pending" },
+      { status: "rejected" }
+    );
+
+    const existingTask = await Task.findOne({ orderId: order._id, assignedEditorId: editorId });
+    if (!existingTask) {
+      await Task.create({
+        orderId: order._id,
+        assignedEditorId: editorId,
+        assignedById: currentUser._id,
+        title: order.projectTitle,
+        details: application.message || "Application accepted — begin work on this project.",
+        estimatedDuration: 120,
+      });
+    }
+
+    const io = req.app.get("io");
+    await createNotification({
+      userId: editorId,
+      type: "application_accepted",
+      title: "Application accepted!",
+      message: `${currentUser.username} accepted your application for "${order.projectTitle}".`,
+      orderId: order._id,
+      io,
+    });
+    await notifyByEmail(
+      application.editorId?.email || (await User.findById(editorId))?.email,
+      "Your application was accepted",
+      `${currentUser.username} accepted your application for "${order.projectTitle}".`
+    );
+
+    await logProjectActivity({
+      orderId: order._id,
+      actorId: currentUser._id,
+      actorName: currentUser.username,
+      actorRole: currentUser.role,
+      action: "editor_hired",
+      details: `${currentUser.username} accepted ${application.editorId?.username || "editor"} via application`,
+      meta: { editorId, applicationId: application._id },
+    });
+
+    const populated = await ProjectOrder.findById(order._id)
+      .populate("clientId", "username email avatar phone")
+      .populate("assignedEditorId", "username email avatar");
+
+    return res.status(200).json({ success: true, data: populated });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const rejectApplication = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (!isClientRole(currentUser.role)) {
+      return res.status(403).json({ success: false, message: "Only clients can reject applications" });
+    }
+
+    const { applicationId } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+      return res.status(400).json({ success: false, message: "Invalid application" });
+    }
+
+    const application = await ProjectApplication.findById(applicationId);
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Application not found" });
+    }
+
+    const order = await ProjectOrder.findById(application.orderId);
+    if (!order) return res.status(404).json({ success: false, message: "Project not found" });
+    if (String(order.clientId) !== String(currentUser._id)) {
+      return res.status(403).json({ success: false, message: "Not your project" });
+    }
+    if (application.status !== "pending") {
+      return res.status(400).json({ success: false, message: "Application is no longer pending" });
+    }
+
+    application.status = "rejected";
+    await application.save();
+
+    const io = req.app.get("io");
+    await createNotification({
+      userId: application.editorId,
+      type: "application_received",
+      title: "Application update",
+      message: `Your application for "${order.projectTitle}" was not selected.`,
+      orderId: order._id,
+      io,
+    });
+
+    return res.status(200).json({ success: true, data: application });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -332,6 +471,7 @@ if (!editor) {
         assignedById: currentUser._id,
         title: order.projectTitle,
         details: "Instant hire assignment",
+        estimatedDuration: 120,
       });
     }
 

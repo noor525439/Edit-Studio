@@ -1,22 +1,22 @@
-import React, { useMemo, useState } from "react";
-import axios from "axios";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
-
-const API_BASE = "http://localhost:3000/workflow";
-
-const getAuthHeader = () => ({
-  headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-});
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { apiPost, WORKFLOW_API } from "@/lib/api";
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const [orderId, setOrderId] = useState("");
+  const [searchParams] = useSearchParams();
+  const [orderId, setOrderId] = useState(searchParams.get("orderId") || "");
   const [totalAmount, setTotalAmount] = useState("");
   const [loading, setLoading] = useState(false);
 
   const numericAmount = useMemo(() => Number(totalAmount), [totalAmount]);
   const ready = orderId && Number.isFinite(numericAmount) && numericAmount > 0;
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("orderId");
+    if (fromUrl) setOrderId(fromUrl);
+  }, [searchParams]);
 
   const startCheckout = async () => {
     if (!ready) {
@@ -26,11 +26,10 @@ export default function Checkout() {
 
     setLoading(true);
     try {
-      const { data } = await axios.post(
-        `${API_BASE}/payments/create-checkout-session`,
-        { orderId, totalAmount: numericAmount },
-        getAuthHeader()
-      );
+      const { data } = await apiPost(`${WORKFLOW_API}/payments/create-checkout-session`, {
+        orderId,
+        totalAmount: numericAmount,
+      });
 
       if (!data?.success || !data?.url) {
         throw new Error(data?.message || "Unable to create checkout session");
@@ -118,8 +117,8 @@ export default function Checkout() {
             </button>
 
             <div className="flex items-center justify-between text-sm">
-              <Link to="/project-workspace" className="text-gray-600 hover:text-gray-900">
-                Back to workspace
+              <Link to="/client/projects" className="text-gray-600 hover:text-gray-900">
+                Back to projects
               </Link>
               <button
                 type="button"

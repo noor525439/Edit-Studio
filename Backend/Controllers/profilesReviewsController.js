@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import ProjectOrder from "../models/ProjectOrderModel.js";
+import Task from "../models/TaskModel.js";
 import ProjectActivity from "../models/ProjectActivityModel.js";
 import ProjectComment from "../models/ProjectCommentModel.js";
 import Submission from "../models/SubmissionModel.js";
@@ -109,7 +110,7 @@ export const getOrderDetail = async (req, res) => {
     if (!currentUser) return;
 
     const order = await ProjectOrder.findById(req.params.orderId)
-      .populate("clientId", "username email role avatar")
+      .populate("clientId", "username email role avatar phone")
       .populate("assignedEditorId", "username email role avatar");
 
     if (!order) {
@@ -129,7 +130,7 @@ export const getOrderDetail = async (req, res) => {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
 
-    const [applications, submissions, activity, comments] = await Promise.all([
+    const [applications, submissions, activity, comments, tasks] = await Promise.all([
       ProjectApplication.find({ orderId: order._id })
         .populate("editorId", "username email avatar")
         .sort({ createdAt: -1 }),
@@ -138,6 +139,9 @@ export const getOrderDetail = async (req, res) => {
       ProjectComment.find({ orderId: order._id })
         .populate("senderId", "username avatar role")
         .sort({ createdAt: 1 }),
+      Task.find({ orderId: order._id })
+        .populate("assignedEditorId", "username email avatar")
+        .sort({ createdAt: -1 }),
     ]);
 
     let editorReview = null;
@@ -156,6 +160,7 @@ export const getOrderDetail = async (req, res) => {
         comments,
         attachments: buildOrderAttachments(order),
         editorReview,
+        tasks,
       },
     });
   } catch (error) {

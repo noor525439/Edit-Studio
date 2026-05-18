@@ -12,10 +12,14 @@ import { emitToUsers } from "../utils/socket.js";
 
 
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Missing STRIPE_SECRET_KEY in environment");
-}
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+let stripe = null;
+const getStripe = () => {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("Missing STRIPE_SECRET_KEY in environment");
+  }
+  if (!stripe) stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  return stripe;
+};
 
 const parseLinks = (input) => {
   if (!input) return [];
@@ -82,6 +86,25 @@ export const createOrder = async (req, res) => {
       autoPriceEstimate,
     } = req.body;
 
+    if (!projectTitle?.trim()) {
+      return res.status(400).json({ success: false, message: "Project title is required" });
+    }
+    if (!videoDuration?.trim()) {
+      return res.status(400).json({ success: false, message: "Video duration is required" });
+    }
+    if (!deadline) {
+      return res.status(400).json({ success: false, message: "Deadline is required" });
+    }
+    if (!instructions?.trim()) {
+      return res.status(400).json({ success: false, message: "Instructions are required" });
+    }
+    if (!rawFootageLink?.trim()) {
+      return res.status(400).json({ success: false, message: "Raw footage link is required" });
+    }
+    if (!revisionPolicyAgreed) {
+      return res.status(400).json({ success: false, message: "Revision policy must be agreed" });
+    }
+
     const createdOrder = await ProjectOrder.create({
       clientId: currentUser._id,
       assignedEditorId: assignedEditorId || null,
@@ -127,9 +150,10 @@ export const getOrders = async (req, res) => {
     if (!currentUser) return;
 
     let query = {};
-    if (currentUser.role === "editor") {
+    const role = normalizeRole(currentUser.role);
+    if (role === "editor") {
       query = { assignedEditorId: currentUser._id };
-    } else if (currentUser.role !== "admin") {
+    } else if (role !== "admin") {
       query = { clientId: currentUser._id };
     }
 
@@ -184,32 +208,74 @@ export const updateOrderProgress = async (req, res) => {
   }
 };
 
+/** Compute live elapsed seconds and whether the countdown has expired. */
+const getTaskTimerState = (task) => {
+  const estimatedSecs = (task.estimatedDuration || 60) * 60;
+  let elapsed = task.elapsedSeconds || 0;
+  if (task.timerStatus === "running" && task.startedAt) {
+    elapsed += Math.floor((Date.now() - new Date(task.startedAt).getTime()) / 1000);
+  }
+  const remainingSeconds = Math.max(0, estimatedSecs - elapsed);
+  const isOverdue = task.timerStatus !== "completed" && elapsed >= estimatedSecs;
+  return { elapsed, remainingSeconds, isOverdue };
+};
+
+const enrichTask = (task) => {
+  const doc = task.toObject ? task.toObject() : { ...task };
+  const { elapsed, remainingSeconds, isOverdue } = getTaskTimerState(doc);
+  doc.liveElapsedSeconds = elapsed;
+  doc.remainingSeconds = remainingSeconds;
+  doc.isOverdueLive = isOverdue;
+  if (isOverdue && doc.timerStatus === "running") doc.isOverdue = true;
+  return doc;
+};
+
 export const createTask = async (req, res) => {
   try {
     const currentUser = await getCurrentUser(req, res);
     if (!currentUser) return;
 
-    const { orderId, assignedEditorId, title, details } = req.body;
+    const { orderId, assignedEditorId, title, details, estimatedDuration } = req.body;
+    if (!orderId || !title?.trim()) {
+      return res.status(400).json({ success: false, message: "orderId and title are required" });
+    }
+
     const order = await ProjectOrder.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    const canAssign =
-      currentUser.role === "admin" || String(order.clientId) === String(currentUser._id);
-    if (!canAssign) {
-      return res.status(403).json({ success: false, message: "Only admin/client can assign tasks" });
+    const role = normalizeRole(currentUser.role);
+    const isAdmin = role === "admin";
+    const isClient = String(order.clientId) === String(currentUser._id);
+    const isAssignedEditor =
+      role === "editor" &&
+      order.assignedEditorId &&
+      String(order.assignedEditorId) === String(currentUser._id);
+
+    if (!isAdmin && !isClient && !isAssignedEditor) {
+      return res.status(403).json({ success: false, message: "Not allowed to create tasks for this project" });
     }
+
+    const editorId = isAssignedEditor
+      ? currentUser._id
+      : assignedEditorId || order.assignedEditorId;
+    if (!editorId) {
+      return res.status(400).json({ success: false, message: "No editor assigned to this project" });
+    }
+
+    const duration = Math.max(1, Number(estimatedDuration) || 60);
 
     const task = await Task.create({
       orderId,
-      assignedEditorId,
+      assignedEditorId: editorId,
       assignedById: currentUser._id,
-      title,
+      title: title.trim(),
       details: details || "",
+      estimatedDuration: duration,
     });
 
-    return res.status(201).json({ success: true, data: task });
+    return res.status(201).json({ success: true, data: enrichTask(task) });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -230,11 +296,22 @@ export const getTasks = async (req, res) => {
     }
 
     const tasks = await Task.find(query)
-      .populate("assignedEditorId", "username email")
-      .populate("orderId", "projectTitle progressStage")
+      .populate("assignedEditorId", "username email avatar")
+      .populate("orderId", "projectTitle progressStage status")
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({ success: true, data: tasks });
+    // Sync overdue flag for running tasks
+    await Promise.all(
+      tasks.map(async (t) => {
+        const { isOverdue } = getTaskTimerState(t);
+        if (isOverdue && !t.isOverdue && t.timerStatus !== "completed") {
+          t.isOverdue = true;
+          await t.save();
+        }
+      })
+    );
+
+    return res.status(200).json({ success: true, data: tasks.map(enrichTask) });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -275,12 +352,20 @@ export const updateTaskTimer = async (req, res) => {
       task.startedAt = null;
       task.completedAt = now;
       task.timerStatus = "completed";
+      const { isOverdue } = getTaskTimerState(task);
+      task.isOverdue = isOverdue;
     } else {
       return res.status(400).json({ success: false, message: "Invalid action. Use start/pause/complete" });
     }
 
+    // Mark overdue while timer is running past estimate
+    if (task.timerStatus === "running") {
+      const { isOverdue } = getTaskTimerState(task);
+      if (isOverdue) task.isOverdue = true;
+    }
+
     await task.save();
-    return res.status(200).json({ success: true, data: task });
+    return res.status(200).json({ success: true, data: enrichTask(task) });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -512,7 +597,7 @@ export const createPaymentIntent = async (req, res) => {
 
     const amountInPaisa = Math.round(numericAmount * 100);
 
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntent = await getStripe().paymentIntents.create({
       amount: amountInPaisa,
       currency: "pkr",
       automatic_payment_methods: { enabled: true },
@@ -567,7 +652,7 @@ export const createCheckoutSession = async (req, res) => {
     const amountInPaisa = Math.round(numericAmount * 100);
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
@@ -616,7 +701,7 @@ export const stripeWebhook = async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripe().webhooks.constructEvent(
       req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
@@ -772,7 +857,7 @@ export const refundPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "No Stripe payment intent found" });
     }
 
-    const refund = await stripe.refunds.create({ payment_intent: payment.stripePaymentIntentId });
+    const refund = await getStripe().refunds.create({ payment_intent: payment.stripePaymentIntentId });
 
     payment.status = "refunded";
     await payment.save();

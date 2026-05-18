@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
-import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star } from "lucide-react";
+import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star, User } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import StarRating from "@/components/StarRating";
 import ActivityTimeline from "@/components/task/ActivityTimeline";
 import TaskAttachments from "@/components/task/TaskAttachments";
 import TaskComments from "@/components/task/TaskComments";
+import ClientInfoCard from "@/components/task/ClientInfoCard";
+import TaskTimerPanel from "@/components/task/TaskTimerPanel";
 import { statusBadgeClass, statusLabel } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const TaskDetailView = ({
   mode,
@@ -29,12 +32,19 @@ const TaskDetailView = ({
   onSubmitReview,
   onCommentPosted,
   clientProfileLink,
+  onAcceptApplication,
+  onRejectApplication,
+  onTaskRefresh,
+  onCreateTask,
 }) => {
   if (loading) return <p className="p-10 text-slate-400">Loading project…</p>;
   if (!data?.order) return <p className="p-10 text-slate-600">Project not found.</p>;
 
   const order = data.order;
   const canApply = mode === "editor" && order.status === "published" && !order.assignedEditorId;
+  const isAssignedEditor = mode === "editor" && order.assignedEditorId;
+  const pendingApps = (data.applications || []).filter((a) => a.status === "pending");
+  const showApplications = mode === "client" && !order.assignedEditorId && pendingApps.length > 0;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
@@ -125,6 +135,67 @@ const TaskDetailView = ({
           )}
         </div>
 
+        {showApplications && (
+          <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+            <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">
+              Editor applications ({pendingApps.length})
+            </h2>
+            <div className="space-y-4">
+              {pendingApps.map((app) => {
+                const ed = app.editorId;
+                const edId = ed?._id || ed;
+                return (
+                  <div key={app._id} className="flex flex-wrap items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={ed?.avatar} />
+                      <AvatarFallback>{(ed?.username || "E").slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-[200px]">
+                      <Link
+                        to={`/editor/profile/${edId}`}
+                        className="font-bold text-slate-900 hover:text-green-600 flex items-center gap-1"
+                      >
+                        <User size={14} /> {ed?.username || "Editor"}
+                      </Link>
+                      <p className="text-xs text-slate-500 mt-0.5">{ed?.email}</p>
+                      {app.message && (
+                        <p className="text-sm text-slate-600 mt-2 italic">&quot;{app.message}&quot;</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => onAcceptApplication?.(app._id)}
+                      >
+                        Accept
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => onRejectApplication?.(app._id)}>
+                        Reject
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {isAssignedEditor && order.clientId && (
+          <ClientInfoCard client={order.clientId} order={order} attachments={data.attachments} />
+        )}
+
+        {isAssignedEditor && (
+          <TaskTimerPanel
+            tasks={data.tasks || []}
+            orderId={order._id}
+            canControl
+            canCreate
+            onRefresh={onTaskRefresh}
+            onCreateTask={onCreateTask}
+          />
+        )}
+
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Attachments</h2>
           <TaskAttachments attachments={data.attachments} />
@@ -158,9 +229,21 @@ const TaskDetailView = ({
           <TaskComments orderId={order._id} comments={data.comments} onPosted={onCommentPosted} />
         </section>
 
+        {mode === "client" && order.status === "delivered" && (
+          <section className="bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-6">
+            <h2 className="font-bold text-slate-800 mb-2">Payment</h2>
+            <p className="text-sm text-slate-600 mb-3">
+              Approve the delivery and release payment to your editor.
+            </p>
+            <Link to={`/checkout?orderId=${order._id}`}>
+              <Button className="bg-green-600 hover:bg-green-700">Go to payment</Button>
+            </Link>
+          </section>
+        )}
+
         {mode === "client" && ["delivered", "revision_requested"].includes(order.status) && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 space-y-4">
-            <h2 className="font-bold text-slate-800">Client actions</h2>
+            <h2 className="font-bold text-slate-800">Review & delivery</h2>
             <div>
               <label className="text-xs font-bold uppercase text-slate-400">Revision reason</label>
               <textarea

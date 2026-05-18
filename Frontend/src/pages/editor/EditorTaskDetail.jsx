@@ -15,6 +15,7 @@ const EditorTaskDetail = () => {
     setLoading(true);
     apiGet(`${WORKFLOW_API}/orders/${id}/detail`)
       .then((res) => setData(res.data.data))
+      .catch(() => toast.error("Failed to load project"))
       .finally(() => setLoading(false));
   };
 
@@ -32,6 +33,10 @@ const EditorTaskDetail = () => {
     }
   };
 
+  const createTask = async (payload) => {
+    await apiPost(`${WORKFLOW_API}/tasks`, payload);
+  };
+
   const clientId = data?.order?.clientId?._id || data?.order?.clientId;
 
   return (
@@ -46,6 +51,8 @@ const EditorTaskDetail = () => {
         setApplyMsg={setApplyMsg}
         onApply={apply}
         onCommentPosted={load}
+        onTaskRefresh={load}
+        onCreateTask={createTask}
         clientProfileLink={clientId ? `/editor/client-profile/${clientId}` : null}
       />
     </RoleGuard>

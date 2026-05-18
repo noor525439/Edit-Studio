@@ -46,6 +46,7 @@ import {
 } from '../Controllers/userController.js'
 
 import { isAuthenticated } from "../middleware/authenticated.js"
+import { authorizeRole } from "../middleware/authorizeRole.js"
 import { UserSchema, validateUser } from "../validators/uservalidate.js"
 
 // router.post('/register', validateUser(UserSchema), registerUser)
@@ -61,9 +62,9 @@ router.post('/editor/update-profile', isAuthenticated, updateEditorProfile);
 router.get('/editor/me', isAuthenticated, getMyProfile);
 router.get('/all-editors', getAllEditors);
 router.get('/search', isAuthenticated, searchUsers);
-router.delete('/reject-editor/:id', isAuthenticated, rejectEditor)
-router.get('/pending-editors', isAuthenticated, getPendingEditors)
-router.put('/approve-editor/:id', isAuthenticated, approveEditor)
+router.delete('/reject-editor/:id', isAuthenticated, authorizeRole("admin"), rejectEditor)
+router.get('/pending-editors', isAuthenticated, authorizeRole("admin"), getPendingEditors)
+router.put('/approve-editor/:id', isAuthenticated, authorizeRole("admin"), approveEditor)
 router.post("/upload", isAuthenticated, upload.array("file", 10), uploadFiles);
 router.get("/upload/my", isAuthenticated, getMyUploads);
 router.delete("/upload/:publicId", isAuthenticated, deleteFile);
