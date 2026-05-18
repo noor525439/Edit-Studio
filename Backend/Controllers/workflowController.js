@@ -10,6 +10,8 @@ import { User } from "../models/Usermodels.js";
 import { calculatePaymentSplit } from "../utils/payment.js";
 import { emitToUsers } from "../utils/socket.js";
 
+
+
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("Missing STRIPE_SECRET_KEY in environment");
 }
