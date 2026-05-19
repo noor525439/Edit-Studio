@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star, User } from "lucide-react";
+import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star, User, CreditCard } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import StarRating from "@/components/StarRating";
 import ActivityTimeline from "@/components/task/ActivityTimeline";
@@ -7,6 +7,7 @@ import TaskAttachments from "@/components/task/TaskAttachments";
 import TaskComments from "@/components/task/TaskComments";
 import ClientInfoCard from "@/components/task/ClientInfoCard";
 import TaskTimerPanel from "@/components/task/TaskTimerPanel";
+import TaskListSection from "@/components/task/TaskListSection";
 import { statusBadgeClass, statusLabel } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -185,6 +186,10 @@ const TaskDetailView = ({
           <ClientInfoCard client={order.clientId} order={order} attachments={data.attachments} />
         )}
 
+        {(data.tasks?.length > 0) && (
+          <TaskListSection tasks={data.tasks} projectId={order._id} mode={mode} />
+        )}
+
         {isAssignedEditor && (
           <TaskTimerPanel
             tasks={data.tasks || []}
@@ -194,6 +199,22 @@ const TaskDetailView = ({
             onRefresh={onTaskRefresh}
             onCreateTask={onCreateTask}
           />
+        )}
+
+        {mode === "client" && order.assignedEditorId && (
+          <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+            <h2 className="font-black text-slate-900 mb-3 uppercase text-[10px] tracking-widest flex items-center gap-2">
+              <CreditCard size={14} className="text-green-600" /> Payment
+            </h2>
+            <p className="text-sm text-slate-600 mb-4">
+              Review amount, due date, and payment status for this project.
+            </p>
+            <Link to={`/client/projects/${order._id}/payment`}>
+              <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+                View payment details
+              </Button>
+            </Link>
+          </section>
         )}
 
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
@@ -228,18 +249,6 @@ const TaskDetailView = ({
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Messages</h2>
           <TaskComments orderId={order._id} comments={data.comments} onPosted={onCommentPosted} />
         </section>
-
-        {mode === "client" && order.status === "delivered" && (
-          <section className="bg-amber-50 border border-amber-100 rounded-2xl p-6 mb-6">
-            <h2 className="font-bold text-slate-800 mb-2">Payment</h2>
-            <p className="text-sm text-slate-600 mb-3">
-              Approve the delivery and release payment to your editor.
-            </p>
-            <Link to={`/checkout?orderId=${order._id}`}>
-              <Button className="bg-green-600 hover:bg-green-700">Go to payment</Button>
-            </Link>
-          </section>
-        )}
 
         {mode === "client" && ["delivered", "revision_requested"].includes(order.status) && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 space-y-4">

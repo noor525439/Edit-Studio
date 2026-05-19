@@ -26,10 +26,10 @@ export default function PaymentSuccess() {
 
         <div className="mt-6 flex flex-col sm:flex-row gap-2">
           <Link
-            to="/project-workspace"
+            to="/client/projects"
             className="flex-1 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-black transition-colors"
           >
-            Go to workspace
+            View projects
           </Link>
           <Link
             to="/checkout"
