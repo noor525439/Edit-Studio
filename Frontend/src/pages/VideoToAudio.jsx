@@ -90,7 +90,7 @@ const VideoToAudio = () => {
                         <ArrowLeft size={14} className="text-blue-500" /> Studio Dashboard
                     </button>
                     <div className="flex items-center gap-6">
-                        <span className="hidden md:block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Workspace: Project Alpha</span>
+                        <span className="hidden md:block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Project: Alpha</span>
                         <div className="h-4 w-[1px] bg-white/10 hidden md:block" />
                         <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-md border border-blue-500/20 text-[9px] font-black uppercase">Local Engine</div>
                     </div>

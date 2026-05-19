@@ -821,8 +821,9 @@ export const getPayments = async (req, res) => {
     if (!currentUser) return;
 
     let query = {};
-    if (currentUser.role === "editor") query.editorId = currentUser._id;
-    else if (currentUser.role !== "admin") query.clientId = currentUser._id;
+    const role = normalizeRole(currentUser.role);
+    if (role === "editor") query.editorId = currentUser._id;
+    else if (role !== "admin") query.clientId = currentUser._id;
 
     const payments = await Payment.find(query)
       .populate("clientId", "username email")

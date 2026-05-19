@@ -22,10 +22,10 @@ export default function PaymentCancel() {
             Try again
           </Link>
           <Link
-            to="/project-workspace"
+            to="/client/projects"
             className="flex-1 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Back to workspace
+            Back to projects
           </Link>
         </div>
       </div>

@@ -461,7 +461,7 @@ export const instantHire = async (req, res) => {
         videoDuration: "TBD",
         deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         editingStyle: "Other",
-        instructions: "Instant hire project — add details in workspace.",
+        instructions: "Instant hire project — add project details from your dashboard.",
         rawFootageLink: "https://pending",
         revisionPolicyAgreed: true,
         status: "project_started",

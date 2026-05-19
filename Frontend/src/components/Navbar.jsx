@@ -1,4 +1,4 @@
-import { FileVideo, LogOut, User, ChevronDown, Compass, Home, Workflow, Sparkles, FolderKanban, ListTodo, Upload, Users, MessageSquare } from 'lucide-react'
+import { FileVideo, LogOut, User, ChevronDown, Compass, Home, Sparkles, FolderKanban, ListTodo, Upload, Users, MessageSquare, CreditCard } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { Link, useNavigate, NavLink } from 'react-router-dom'
 import {
@@ -91,6 +91,10 @@ const Navbar = () => {
                                     <Compass size={15} strokeWidth={2.5} />
                                     Editors
                                 </NavLink>
+                                <NavLink to="/checkout" className={linkStyles} end>
+                                    <CreditCard size={15} strokeWidth={2.5} />
+                                    Payments
+                                </NavLink>
                             </>
                         )}
 
@@ -133,12 +137,6 @@ const Navbar = () => {
                                 </NavLink>
                             </>
                         )}
-
-                        {/* Workspace - sab ke liye */}
-                        <NavLink to="/project-workspace" className={linkStyles} end>
-                            <Workflow size={15} strokeWidth={2.5} />
-                            Workspace
-                        </NavLink>
 
                     </div>
                 </div>

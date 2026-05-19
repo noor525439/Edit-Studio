@@ -21,8 +21,10 @@ import MasteryAcademy from "./pages/MasteryAcademy"
 import VoiceGenerator from "./pages/VoiceGenerator"
 import VideoToAudio from "./pages/VideoToAudio"
 import SpeechToAudio from "./pages/SpeechToAudio"
-import ProjectWorkspace from "./pages/ProjectWorkspace"
 import Checkout from "./pages/Checkout"
+import ClientTaskDetailPage from "./pages/client/ClientTaskDetailPage"
+import ClientPaymentReview from "./pages/client/ClientPaymentReview"
+import EditorTaskItemDetail from "./pages/editor/EditorTaskItemDetail"
 import PaymentSuccess from "./pages/PaymentSuccess"
 import PaymentCancel from "./pages/PaymentCancel"
 
@@ -41,6 +43,7 @@ import EditorGigs from "./pages/editor/EditorGigs"
 import AdminProjects from "./pages/admin/AdminProjects"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import { dashboardPath } from "./lib/roles"
+import { getData } from "./context/userContext"
 
 const withNav = (el) => <><Navbar />{el}</>
 
@@ -59,6 +62,8 @@ const router = createBrowserRouter([
   { path: '/client/projects', element: withNav(<ClientProjects />) },
   { path: '/client/projects/create', element: withNav(<ClientProjectCreate />) },
   { path: '/client/projects/:id', element: withNav(<ClientProjectDetail />) },
+  { path: '/client/projects/:projectId/tasks/:taskId', element: withNav(<ClientTaskDetailPage />) },
+  { path: '/client/projects/:projectId/payment', element: withNav(<ClientPaymentReview />) },
   { path: '/client/hire/:editorId', element: withNav(<ClientHire />) },
   { path: '/client/editors', element: withNav(<ClientProfile />) },
 
@@ -66,6 +71,7 @@ const router = createBrowserRouter([
   { path: '/editor/dashboard', element: withNav(<EditorDashboardPage />) },
   { path: '/editor/tasks', element: withNav(<EditorTasks />) },
   { path: '/editor/tasks/:id', element: withNav(<EditorTaskDetail />) },
+  { path: '/editor/projects/:projectId/tasks/:taskId', element: withNav(<EditorTaskItemDetail />) },
   { path: '/editor/submissions', element: withNav(<EditorSubmissions />) },
   { path: '/editor/client-profile/:clientId', element: withNav(<EditorClientProfile />) },
   { path: '/editor/profile/:editorId', element: withNav(<EditorPublicProfile />) },
@@ -96,13 +102,18 @@ const router = createBrowserRouter([
   { path: '/voice-generator', element: <VoiceGenerator /> },
   { path: '/vedio-to-audio', element: <VideoToAudio /> },
   { path: '/speech-to-audio', element: <SpeechToAudio /> },
-  { path: '/project-workspace', element: withNav(<ProjectWorkspace />) },
+  { path: '/project-workspace', element: <WorkspaceRedirect /> },
   { path: '/checkout', element: withNav(<Checkout />) },
   { path: '/payment-success', element: <PaymentSuccess /> },
   { path: '/payment-cancel', element: <PaymentCancel /> },
 
   { path: '/:role-dashboard', element: <RoleDashboardRedirect /> },
 ])
+
+function WorkspaceRedirect() {
+  const { user } = getData()
+  return <Navigate to={user ? dashboardPath(user.role) : "/login"} replace />
+}
 
 function RoleDashboardRedirect() {
   const role = window.location.pathname.split('/')[1]?.replace('-dashboard', '')
