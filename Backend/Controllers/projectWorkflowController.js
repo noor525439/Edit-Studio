@@ -385,50 +385,71 @@ export const applyForProject = async (req, res) => {
 };
 
 export const instantHire = async (req, res) => {
+  console.log("🔍 instantHire called");
+  console.log("req.userId:", req.userId);
+  console.log("req.body:", req.body);
   try {
-    const currentUser = await getCurrentUser(req, res);
-    if (!currentUser) return;
-    if (!isClientRole(currentUser.role)) {
+    let currentUser;
+    const isUserEmail = String(req.userId || "").includes("@");
+
+    if (isUserEmail) {
+      currentUser = await User.findOne({ email: req.userId });
+    } else if (req.userId && mongoose.Types.ObjectId.isValid(req.userId)) {
+      currentUser = await User.findById(req.userId);
+    }
+
+    if (!currentUser) {
+      return res.status(401).json({ success: false, message: "Unauthorized: User not found" });
+    }
+
+    const userRole = String(currentUser.role || "").toLowerCase();
+    if (userRole !== "client" && userRole !== "freelancer") {
       return res.status(403).json({ success: false, message: "Only clients can hire editors" });
     }
 
     const { editorId, orderId, paymentConfirmed } = req.body;
+
     if (!paymentConfirmed) {
       return res.status(400).json({ success: false, message: "Payment confirmation required" });
     }
-    if (!mongoose.Types.ObjectId.isValid(editorId)) {
-      return res.status(400).json({ success: false, message: "Invalid editor" });
+
+    // ✅ Sirf ObjectId allowed hai — email aaye toh reject
+    if (!editorId || !mongoose.Types.ObjectId.isValid(editorId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid editor ID — valid MongoDB ObjectId required",
+      });
     }
 
-let editor;
-let editorUserId;
+    // ✅ Pehle Editor profile mein dhundho
+    let editorUserId;
+    const editorProfile = await Editor.findById(editorId);
 
-// Check karein ke jo editorId aayi hai wo email hai ya ObjectId
-const isEmail = String(editorId).includes('@');
+    if (editorProfile?.userId) {
+      editorUserId = editorProfile.userId;
+    } else {
+      // editorId directly User ka _id ho sakta hai
+      editorUserId = editorId;
+    }
 
-if (isEmail) {
-  // Agar galti se frontend se email aaya hai, toh User model mein email se dhoodhein
-  editor = await User.findOne({ email: editorId, role: "editor", isApproved: true });
-  if (editor) editorUserId = editor._id;
-} else {
-  // Agar valid ID aayi hai, toh normal flow chalayein
-  const editorProfile = await Editor.findById(editorId);
-  if (editorProfile?.userId) {
-    editorUserId = editorProfile.userId;
-  } else {
-    editorUserId = editorId;
-  }
-  editor = await User.findOne({ _id: editorUserId, role: "editor", isApproved: true });
-}
+    // ✅ Ab User fetch karo
+    const editor = await User.findOne({
+      _id: editorUserId,
+      role: "editor",
+      isApproved: true,
+    });
 
-if (!editor) {
-  return res.status(404).json({ success: false, message: "Editor not found or not approved" });
-}
+    if (!editor) {
+      return res.status(404).json({ success: false, message: "Editor not found or not approved" });
+    }
 
+    // Order logic
     let order;
     if (orderId && mongoose.Types.ObjectId.isValid(orderId)) {
       order = await ProjectOrder.findById(orderId);
-      if (!order) return res.status(404).json({ success: false, message: "Project not found" });
+      if (!order) {
+        return res.status(404).json({ success: false, message: "Project not found" });
+      }
       if (String(order.clientId) !== String(currentUser._id)) {
         return res.status(403).json({ success: false, message: "Not your project" });
       }
@@ -454,7 +475,6 @@ if (!editor) {
     order.status = "project_started";
     order.hireType = "instant_hire";
     order.progressPercent = order.progressPercent || 0;
-    if (order.status === "draft") order.status = "project_started";
     await order.save();
 
     await ProjectApplication.findOneAndUpdate(
@@ -463,7 +483,10 @@ if (!editor) {
       { upsert: true }
     );
 
-    const existingTask = await Task.findOne({ orderId: order._id, assignedEditorId: editor._id });
+    const existingTask = await Task.findOne({
+      orderId: order._id,
+      assignedEditorId: editor._id,
+    });
     if (!existingTask) {
       await Task.create({
         orderId: order._id,
@@ -476,6 +499,7 @@ if (!editor) {
     }
 
     const io = req.app.get("io");
+
     await createNotification({
       userId: editor._id,
       type: "instant_hire",
@@ -493,16 +517,17 @@ if (!editor) {
       io,
     });
 
-    await notifyByEmail(
-      editor.email,
-      "You've been hired on Edit Studio",
-      `${currentUser.username} hired you for "${order.projectTitle}". Check your editor dashboard.`
-    );
-    await notifyByEmail(
-      currentUser.email,
-      "Project started on Edit Studio",
-      `You hired ${editor.username} for "${order.projectTitle}".`
-    );
+// ✅ email ki jagah _id pass karo
+await notifyByEmail(
+  editor._id,
+  "You've been hired on Edit Studio",
+  `${currentUser.username} hired you for "${order.projectTitle}". Check your editor dashboard.`
+);
+await notifyByEmail(
+  currentUser._id,
+  "Project started on Edit Studio",
+  `You hired ${editor.username} for "${order.projectTitle}".`
+);
 
     await logProjectActivity({
       orderId: order._id,
@@ -520,7 +545,8 @@ if (!editor) {
 
     return res.status(200).json({ success: true, data: populated });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+  console.error("❌ instantHire error:", error); // pura error object
+  return res.status(500).json({ success: false, message: error.message });
   }
 };
 
