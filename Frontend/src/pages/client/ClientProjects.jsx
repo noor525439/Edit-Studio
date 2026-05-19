@@ -16,6 +16,7 @@ const ClientProjects = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  
   return (
     <RoleGuard allowedRoles={CLIENT_ROLES}>
       <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
