@@ -22,7 +22,13 @@ import {
   refundPayment,
   getPayments,
   createCheckoutSession,
-  approvePaymentManual
+  approvePaymentManual,
+  submitReview,
+  getProjectReviews,
+  getEditorReviews,
+  getAllReviewsAdmin,
+  editReview,
+  deleteReview,
 } from "../Controllers/workflowController.js";
 import {
   getOrderById,
@@ -111,5 +117,14 @@ router.get("/submissions", isAuthenticated, getSubmissions);
 router.get("/notifications", isAuthenticated, getNotifications);
 router.patch("/notifications/:notificationId/read", isAuthenticated, markNotificationRead);
 router.patch("/notifications/read-all", isAuthenticated, markAllNotificationsRead);
+
+// Client Review Panel API — mounted at /api/reviews in server.js
+export const reviewApiRouter = express.Router();
+reviewApiRouter.post("/", isAuthenticated, authorizeRole("client"), submitReview);
+reviewApiRouter.get("/project/:id", isAuthenticated, getProjectReviews);
+reviewApiRouter.get("/editor/:id", isAuthenticated, getEditorReviews);
+reviewApiRouter.get("/admin/all", isAuthenticated, authorizeRole("admin"), getAllReviewsAdmin);
+reviewApiRouter.put("/:id", isAuthenticated, authorizeRole("client"), editReview);
+reviewApiRouter.delete("/:id", isAuthenticated, authorizeRole("admin"), deleteReview);
 
 export default router;

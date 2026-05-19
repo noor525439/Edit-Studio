@@ -1062,3 +1062,243 @@ export const getReviews = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const CLIENT_REVIEW_ROLES = ["client", "freelancer"];
+const isClientReviewRole = (role) => CLIENT_REVIEW_ROLES.includes(String(role || "").toLowerCase());
+
+const resolveProjectId = (body = {}, params = {}) =>
+  body.projectId || body.orderId || params.id || params.projectId;
+
+/** Client Review Panel — submit review (one per client per project) */
+export const submitReview = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (!isClientReviewRole(currentUser.role)) {
+      return res.status(403).json({ success: false, message: "Only clients can submit reviews" });
+    }
+
+    const projectId = resolveProjectId(req.body, req.params);
+    const rating = Number(req.body.rating);
+    const comment = String(req.body.comment || req.body.feedback || "").trim();
+
+    if (!projectId) {
+      return res.status(400).json({ success: false, message: "projectId is required" });
+    }
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
+    }
+
+    const order = await ProjectOrder.findById(projectId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+    if (String(order.clientId) !== String(currentUser._id)) {
+      return res.status(403).json({ success: false, message: "You can only review your own projects" });
+    }
+    if (!order.assignedEditorId) {
+      return res.status(400).json({ success: false, message: "No editor assigned to this project" });
+    }
+
+    const duplicate = await Review.findOne({
+      clientId: currentUser._id,
+      $or: [{ projectId }, { orderId: projectId }],
+    });
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already reviewed this project",
+      });
+    }
+
+    const review = await Review.create({
+      projectId,
+      orderId: projectId,
+      clientId: currentUser._id,
+      clientName: currentUser.username || "",
+      editorId: order.assignedEditorId,
+      rating,
+      comment,
+      feedback: comment,
+    });
+
+    order.clientRating = rating;
+    order.clientReviewText = comment;
+    await order.save();
+
+    return res.status(201).json({ success: true, data: review });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ success: false, message: "You have already reviewed this project" });
+    }
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** All reviews for a single project + average */
+export const getProjectReviews = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+
+    const projectId = req.params.id;
+    const order = await ProjectOrder.findById(projectId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    const reviews = await Review.find({
+      $or: [{ projectId }, { orderId: projectId }],
+    })
+      .populate("clientId", "username avatar")
+      .sort({ createdAt: -1 });
+
+    const totalCount = reviews.length;
+    const averageRating = totalCount
+      ? Number((reviews.reduce((s, r) => s + r.rating, 0) / totalCount).toFixed(1))
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      data: { reviews, averageRating, totalCount },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** Reviews on projects assigned to an editor */
+export const getEditorReviews = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+
+    const editorId = req.params.id;
+    const role = normalizeRole(currentUser.role);
+    if (role === "editor" && String(currentUser._id) !== String(editorId)) {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    const projectIds = await ProjectOrder.find({ assignedEditorId: editorId }).distinct("_id");
+    const reviews = await Review.find({
+      $or: [{ editorId }, { orderId: { $in: projectIds } }, { projectId: { $in: projectIds } }],
+    })
+      .populate("clientId", "username avatar")
+      .populate("orderId", "projectTitle")
+      .populate("projectId", "projectTitle")
+      .sort({ createdAt: -1 });
+
+    const totalCount = reviews.length;
+    const averageRating = totalCount
+      ? Number((reviews.reduce((s, r) => s + r.rating, 0) / totalCount).toFixed(1))
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      data: { reviews, averageRating, totalCount },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** Admin — all reviews with optional filters */
+export const getAllReviewsAdmin = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (normalizeRole(currentUser.role) !== "admin") {
+      return res.status(403).json({ success: false, message: "Admin only" });
+    }
+
+    const { editorId, projectId, rating } = req.query;
+    const query = {};
+    if (editorId) query.editorId = editorId;
+    if (projectId) {
+      query.$or = [{ projectId }, { orderId: projectId }];
+    }
+    if (rating) query.rating = Number(rating);
+
+    const reviews = await Review.find(query)
+      .populate("clientId", "username email")
+      .populate("editorId", "username email")
+      .populate("orderId", "projectTitle")
+      .populate("projectId", "projectTitle")
+      .sort({ createdAt: -1 });
+
+    const totalCount = reviews.length;
+    const averageRating = totalCount
+      ? Number((reviews.reduce((s, r) => s + r.rating, 0) / totalCount).toFixed(1))
+      : 0;
+
+    return res.status(200).json({
+      success: true,
+      data: { reviews, averageRating, totalCount },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** Client edits own review */
+export const editReview = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (!isClientReviewRole(currentUser.role)) {
+      return res.status(403).json({ success: false, message: "Only clients can edit reviews" });
+    }
+
+    const rating = Number(req.body.rating);
+    const comment = String(req.body.comment || req.body.feedback || "").trim();
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ success: false, message: "Rating must be between 1 and 5" });
+    }
+
+    const review = await Review.findById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ success: false, message: "Review not found" });
+    }
+    if (String(review.clientId) !== String(currentUser._id)) {
+      return res.status(403).json({ success: false, message: "You can only edit your own review" });
+    }
+
+    review.rating = rating;
+    review.comment = comment;
+    review.feedback = comment;
+    review.clientName = currentUser.username || review.clientName;
+    await review.save();
+
+    const pid = review.projectId || review.orderId;
+    if (pid) {
+      await ProjectOrder.updateOne(
+        { _id: pid },
+        { clientRating: rating, clientReviewText: comment }
+      );
+    }
+
+    return res.status(200).json({ success: true, data: review });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/** Admin deletes a review */
+export const deleteReview = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (normalizeRole(currentUser.role) !== "admin") {
+      return res.status(403).json({ success: false, message: "Admin only" });
+    }
+
+    const review = await Review.findByIdAndDelete(req.params.id);
+    if (!review) {
+      return res.status(404).json({ success: false, message: "Review not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Review deleted" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};

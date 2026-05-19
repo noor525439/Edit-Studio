@@ -6,7 +6,9 @@ import {
   Check, X, UserCircle, Users, Clock, DollarSign, Briefcase, 
   FileText, ExternalLink, UserPlus, TrendingUp, Wallet, CheckCircle2 
 } from 'lucide-react';
-import { getData } from '@/context/UserContext';
+import { getData } from '@/context/userContext';
+import { apiDelete, apiGet, REVIEWS_API } from '@/lib/api';
+import StarRating from '@/components/StarRating';
 
 const AdminDashboard = () => {
   const { user, loading } = getData();
@@ -17,6 +19,12 @@ const AdminDashboard = () => {
     payments: [],
   });
   const [isFetching, setIsFetching] = useState(true);
+  const [adminReviews, setAdminReviews] = useState([]);
+  const [reviewsSummary, setReviewsSummary] = useState({ averageRating: 0, totalCount: 0 });
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [filterEditorId, setFilterEditorId] = useState("");
+  const [filterProjectId, setFilterProjectId] = useState("");
+  const [filterRating, setFilterRating] = useState("");
 
   const getAuthHeader = useCallback(() => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
@@ -44,9 +52,46 @@ const AdminDashboard = () => {
     }
   }, [getAuthHeader]);
 
+  const fetchAdminReviews = useCallback(async () => {
+    setReviewsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filterEditorId.trim()) params.set("editorId", filterEditorId.trim());
+      if (filterProjectId.trim()) params.set("projectId", filterProjectId.trim());
+      if (filterRating) params.set("rating", filterRating);
+      const qs = params.toString();
+      const res = await apiGet(`${REVIEWS_API}/admin/all${qs ? `?${qs}` : ""}`);
+      const payload = res.data.data || {};
+      setAdminReviews(payload.reviews || []);
+      setReviewsSummary({
+        averageRating: payload.averageRating || 0,
+        totalCount: payload.totalCount || 0,
+      });
+    } catch {
+      toast.error("Failed to load reviews");
+      setAdminReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, [filterEditorId, filterProjectId, filterRating]);
+
   useEffect(() => {
     if (user?.role === 'admin') fetchDashboardData();
   }, [user, fetchDashboardData]);
+
+  useEffect(() => {
+    if (user?.role === 'admin') fetchAdminReviews();
+  }, [user, fetchAdminReviews]);
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await apiDelete(`${REVIEWS_API}/${reviewId}`);
+      toast.success("Review deleted");
+      fetchAdminReviews();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Delete failed");
+    }
+  };
 
   const handleEditorAction = async (id, action) => {
     try {
@@ -156,6 +201,54 @@ const AdminDashboard = () => {
             </div>
           </section>
 
+          <section className="space-y-6">
+            <SectionHeader icon={<FileText size={20} className="text-rose-600"/>} title="Client Reviews" count={reviewsSummary.totalCount} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total reviews</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">{reviewsSummary.totalCount}</p>
+              </div>
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-center gap-3">
+                <div>
+                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Average rating</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{reviewsSummary.averageRating} / 5</p>
+                </div>
+                <StarRating value={reviewsSummary.averageRating} readonly size={20} />
+              </div>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3">
+              <input className="border border-slate-200 rounded-xl px-3 py-2 text-sm" placeholder="Filter by editor ID" value={filterEditorId} onChange={(e) => setFilterEditorId(e.target.value)} />
+              <input className="border border-slate-200 rounded-xl px-3 py-2 text-sm" placeholder="Filter by project ID" value={filterProjectId} onChange={(e) => setFilterProjectId(e.target.value)} />
+              <select className="border border-slate-200 rounded-xl px-3 py-2 text-sm" value={filterRating} onChange={(e) => setFilterRating(e.target.value)}>
+                <option value="">All ratings</option>
+                {[5, 4, 3, 2, 1].map((n) => (<option key={n} value={n}>{n} stars</option>))}
+              </select>
+              <button type="button" onClick={fetchAdminReviews} className="px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-black">Apply filters</button>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+              {reviewsLoading ? (
+                <div className="p-12 text-center text-slate-400">Loading reviews…</div>
+              ) : adminReviews.length === 0 ? (
+                <div className="p-12 text-center text-slate-400">No reviews match your filters.</div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {adminReviews.map((r) => (
+                    <div key={r._id} className="p-5 flex flex-wrap items-start justify-between gap-4 hover:bg-slate-50">
+                      <div className="min-w-[200px]">
+                        <p className="font-semibold text-slate-800">{r.clientName || r.clientId?.username || "Client"}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Editor: {r.editorId?.username || "—"} · Project: {r.orderId?.projectTitle || r.projectId?.projectTitle || "—"}</p>
+                        <div className="mt-2"><StarRating value={r.rating} readonly size={16} /></div>
+                        <p className="text-sm text-slate-600 mt-2 italic">&quot;{r.comment || r.feedback}&quot;</p>
+                        <p className="text-[11px] text-slate-400 mt-1">{new Date(r.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <button type="button" onClick={() => handleDeleteReview(r._id)} className="px-4 py-2 text-xs font-semibold text-red-600 border border-red-200 rounded-xl hover:bg-red-50">Delete</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
         </div>
       </div>
     </div>
@@ -219,8 +312,8 @@ const WideProfileRow = ({ profile }) => (
       </div>
     </div>
     <div className="flex gap-2">
-      {profile.skills?.slice(0,3).map((s, i) => (
-        <span key={i} className="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 font-semibold uppercase tracking-wider border border-slate-50">{s}</span>
+      {profile.skills?.slice(0,3).map((s) => (
+        <span key={`${profile._id}-${s}`} className="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 font-semibold uppercase tracking-wider border border-slate-50">{s}</span>
       ))}
     </div>
   </div>

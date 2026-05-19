@@ -2,7 +2,7 @@ import 'dotenv/config'
 import express from "express"
 import dbConnection from "./dbConnection.js"
 import userRoute from "./routes/userRoute.js"
-import workflowRoute from "./routes/workflowRoute.js"
+import workflowRoute, { reviewApiRouter } from "./routes/workflowRoute.js"
 import usersApiRoute from "./routes/usersApiRoute.js"
 import supportRoute from "./routes/supportRoute.js"
 import cors from 'cors'
@@ -53,6 +53,7 @@ dbConnection()
 app.use('/user', userRoute)
 app.use('/api/users', usersApiRoute)
 app.use('/workflow', workflowRoute)
+app.use('/api/reviews', reviewApiRouter)
 app.use('/api/support', supportRoute)
 
 
