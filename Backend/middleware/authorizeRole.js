@@ -22,7 +22,16 @@ export const authorizeRole = (...roles) => {
 
   return async (req, res, next) => {
     try {
-      const currentUser = await User.findById(req.userId).select("role");
+      // ⬇️ CHECK: Agar req.userId mein email hai toh findOne use karein, warna findById
+      let currentUser;
+      const isEmail = String(req.userId || "").includes('@');
+
+      if (isEmail) {
+        currentUser = await User.findOne({ email: req.userId }).select("role");
+      } else {
+        currentUser = await User.findById(req.userId).select("role");
+      }
+
       if (!currentUser) {
         return res.status(404).json({ success: false, message: "User not found" });
       }

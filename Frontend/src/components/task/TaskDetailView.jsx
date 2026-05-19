@@ -49,7 +49,7 @@ const TaskDetailView = ({
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Link to={backLink} className="text-sm font-bold text-green-600 hover:underline mb-6 inline-block">
           {backLabel}
         </Link>

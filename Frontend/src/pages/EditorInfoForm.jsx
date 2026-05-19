@@ -86,7 +86,7 @@ const EditorInfoForm = () => {
 
     return (
         <div className="min-h-screen bg-[#fafafa] p-6 lg:p-12 font-sans">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-5xl mx-auto">
                 <div className="flex items-center justify-between mb-12">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
