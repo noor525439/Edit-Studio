@@ -821,7 +821,7 @@ export const getPayments = async (req, res) => {
     if (!currentUser) return;
 
     let query = {};
-    const role = normalizeRole(currentUser.role);
+    const role = normalizeRole(currentUser.role); 
     if (role === "editor") query.editorId = currentUser._id;
     else if (role !== "admin") query.clientId = currentUser._id;
 
@@ -831,7 +831,7 @@ export const getPayments = async (req, res) => {
       .populate("orderId", "projectTitle")
       .sort({ createdAt: -1 });
 
-    const role = normalizeRole(currentUser.role);
+    // Deleted the duplicate line that was here
     const data = payments.map((doc) => {
       const o = doc.toObject ? doc.toObject() : { ...doc };
       if (role === "editor") {
@@ -846,7 +846,6 @@ export const getPayments = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-
 export const refundPayment = async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.paymentId);
