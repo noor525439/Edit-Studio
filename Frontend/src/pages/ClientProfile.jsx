@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { getData } from '@/context/UserContext'
+import { getData } from '@/context/userContext'
 import { Navigate, Link } from 'react-router-dom'
 import { Zap } from 'lucide-react'
 import { CLIENT_ROLES } from '@/lib/roles'
@@ -25,7 +25,7 @@ const ClientProfile = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 p-6 md:p-12">
-            <main className="max-w-7xl mx-auto">
+            <main className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-2">
                     <h2 className="text-2xl font-black text-slate-900">Find Editors</h2>
                     <Link to="/editor/gigs" className="text-sm font-bold text-green-600 hover:underline">

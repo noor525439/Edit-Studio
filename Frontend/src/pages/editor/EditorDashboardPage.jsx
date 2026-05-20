@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import RoleGuard from "@/components/RoleGuard";
 import ProgressBar from "@/components/ProgressBar";
-import { getData } from "@/context/UserContext";
+import { getData } from "@/context/userContext";
 import { apiGet, apiPut, WORKFLOW_API } from "@/lib/api";
 import { statusBadgeClass, statusLabel } from "@/lib/roles";
 import StarRating from "@/components/StarRating";
@@ -57,7 +57,7 @@ const EditorDashboardPage = () => {
   return (
     <RoleGuard allowedRoles={["editor", "admin"]}>
       <div className="min-h-screen bg-slate-50 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap justify-between gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-black text-slate-900 mb-2">Editor Dashboard</h1>

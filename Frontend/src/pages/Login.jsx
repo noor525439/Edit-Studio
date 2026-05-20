@@ -6,7 +6,7 @@ import { Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react'
 import axios from 'axios'
 import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
-import { getData } from '@/context/UserContext'
+import { getData } from '@/context/userContext'
 
 const Login = ({ selectedRole, onBack }) => {
   const { setUser } = getData()

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-export const UserContext = createContext(null);
+export const userContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
   // 1. Try to get the user from LocalStorage first. 
@@ -25,10 +25,10 @@ export const UserProvider = ({ children }) => {
   }, [user]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <userContext.Provider value={{ user, setUser }}>
       {children}
-    </UserContext.Provider>
+    </userContext.Provider>
   );
 };
 
-export const getData = () => useContext(UserContext);
+export const getData = () => useContext(userContext);

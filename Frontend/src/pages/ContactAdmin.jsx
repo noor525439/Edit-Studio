@@ -1,7 +1,7 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 // Pehle wale import { UserContext } ko hata kar yeh likhein
-import { getData } from '../context/UserContext';
+import { getData } from '../context/userContext';
 import axios from 'axios';
 
 const ContactAdmin = () => {
@@ -77,7 +77,8 @@ const ContactAdmin = () => {
         });
 
         const response = await axios.post(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/api/support/create`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/support/create,
+        }`,  
           formDataWithFiles,
           {
             headers: {
@@ -90,7 +91,7 @@ const ContactAdmin = () => {
         setStatus('success');
       } else {
         const response = await axios.post(
-          `${process.env.REACT_APP_API_URL || 'http://localhost:3000'}/api/support/create`,
+          `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/support/create`,
           submitData,
           {
             headers: {

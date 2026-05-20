@@ -19,7 +19,7 @@ const EditorTasks = () => {
   return (
     <RoleGuard allowedRoles={["editor", "admin"]}>
       <div className="min-h-screen bg-slate-50 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-black text-slate-900 mb-8">Task List</h1>
 
           <h2 className="text-lg font-bold text-slate-700 mb-4">Open tasks</h2>

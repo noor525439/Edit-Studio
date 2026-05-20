@@ -166,7 +166,8 @@ const ClientProjectDetail = () => {
     ["delivered", "revision_requested", "completed"].includes(data?.order?.status);
 
   return (
-    <RoleGuard allowedRoles={CLIENT_ROLES}>
+    <div className="bg-gray-50">
+    <RoleGuard allowedRoles={CLIENT_ROLES}   className="min-h-screen bg-[#F8FAFC]">
       <TaskDetailView
         mode="client"
         data={data}
@@ -189,10 +190,10 @@ const ClientProjectDetail = () => {
       />
 
       {/* Client Review Panel */}
-      <div className="max-w-5xl mx-auto px-6 lg:px-10 pb-10 -mt-4">
+      <div className="max-w-6xl mx-auto pb-10 bg-gray-50">
         <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-          <h2 className="text-lg font-black text-slate-900 mb-1">Client Review Panel</h2>
-          <p className="text-sm text-slate-500 mb-6">
+          <h2 className="text-xl font-black text-slate-900 mb-1">Client Review Panel</h2>
+          <p className="text-sm text-slate-500 mb-2">
             Share your experience working with the editor on this project.
           </p>
 
@@ -267,6 +268,7 @@ const ClientProjectDetail = () => {
         </section>
       </div>
     </RoleGuard>
+    </div>
   );
 };
 

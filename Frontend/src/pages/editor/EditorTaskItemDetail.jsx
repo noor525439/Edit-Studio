@@ -59,7 +59,7 @@ const EditorTaskItemDetail = () => {
           projectLinkLabel={order?.projectTitle}
         />
         {task && (
-          <div className="max-w-3xl mx-auto mt-6">
+          <div className="max-w-5xl mx-auto mt-6">
             <TaskTimerPanel
               tasks={[task]}
               orderId={projectId}

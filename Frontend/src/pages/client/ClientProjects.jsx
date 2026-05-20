@@ -20,7 +20,7 @@ const ClientProjects = () => {
   return (
     <RoleGuard allowedRoles={CLIENT_ROLES}>
       <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
-        <div className="max-w-9xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-black text-slate-900">My Projects</h1>
             <Link

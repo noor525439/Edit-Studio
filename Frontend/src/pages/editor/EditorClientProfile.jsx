@@ -31,7 +31,7 @@ const EditorClientProfile = () => {
   return (
     <RoleGuard allowedRoles={["editor", "admin"]}>
       <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <Link to="/editor/tasks" className="text-sm font-bold text-green-600 hover:underline mb-6 inline-block">
             ← Back to tasks
           </Link>

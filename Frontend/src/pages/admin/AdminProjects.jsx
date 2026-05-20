@@ -16,7 +16,7 @@ const AdminProjects = () => {
   return (
     <RoleGuard allowedRoles={["admin"]}>
       <div className="min-h-screen bg-slate-50 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl font-black text-slate-900 mb-2">Admin — Projects</h1>
           <p className="text-slate-500 mb-8">Overview of all platform projects.</p>
           {loading ? (

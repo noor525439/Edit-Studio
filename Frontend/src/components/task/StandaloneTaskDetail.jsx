@@ -25,7 +25,7 @@ const StandaloneTaskDetail = ({ task, order, attachments = [], backLink, backLab
   const isOverdue = task.isOverdue || task.isOverdueLive;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       <Link to={backLink} className="text-sm font-bold text-green-600 hover:underline mb-6 inline-block">
         {backLabel}
       </Link>

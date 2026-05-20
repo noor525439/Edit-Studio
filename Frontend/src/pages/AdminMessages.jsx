@@ -34,6 +34,8 @@ const AdminMessages = () => {
         `${API_URL}/api/support?${params.toString()}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
+              console.log(Object.keys(localStorage))
+console.log(localStorage.getItem('authToken'))
 
       setMessages(response.data.data);
       setMessagePage(page);
@@ -137,7 +139,7 @@ const AdminMessages = () => {
 
   return (
     <div className="admin-messages-container min-h-screen bg-slate-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-2">Support Messages</h1>

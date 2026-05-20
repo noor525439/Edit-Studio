@@ -245,8 +245,8 @@ const TaskDetailView = ({
           <ActivityTimeline activity={data.activity} />
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-          <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Messages</h2>
+        <section className="bg-white border border-slate-200 rounded-2xl p-6">
+          <h2 className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Messages</h2>
           <TaskComments orderId={order._id} comments={data.comments} onPosted={onCommentPosted} />
         </section>
 

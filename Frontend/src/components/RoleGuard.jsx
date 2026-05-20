@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { getData } from "@/context/UserContext";
+import { getData } from "@/context/userContext";
 import { dashboardPath } from "@/lib/roles";
 
 const RoleGuard = ({ children, allowedRoles }) => {

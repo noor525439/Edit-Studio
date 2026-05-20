@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Zap } from "lucide-react";
-import { getData } from "@/context/UserContext";
+import { getData } from "@/context/userContext";
 import { apiGet, WORKFLOW_API } from "@/lib/api";
 import { isClient } from "@/lib/roles";
 import StarRating from "@/components/StarRating";
@@ -30,7 +30,7 @@ const EditorGigs = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-12">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="mb-10">
           <h1 className="text-3xl font-black text-slate-900">Editor Gigs</h1>
           <p className="text-slate-500 mt-2">

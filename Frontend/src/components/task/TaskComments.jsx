@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { getData } from "@/context/UserContext";
+import { getData } from "@/context/userContext";
 import { apiPost, WORKFLOW_API } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";

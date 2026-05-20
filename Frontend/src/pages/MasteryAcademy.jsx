@@ -70,7 +70,7 @@ const MasteryAcademy = () => {
             </div>
 
             {/* Header / Nav */}
-            <nav className="relative z-50 pt-10 px-6 max-w-7xl mx-auto flex items-center justify-between">
+            <nav className="relative z-50 pt-10 px-6 max-w-6xl mx-auto flex items-center justify-between">
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-white transition-colors group"
@@ -84,7 +84,7 @@ const MasteryAcademy = () => {
             </nav>
 
             {/* Main Content */}
-            <main className="relative z-10 pt-20 pb-32 px-6 max-w-7xl mx-auto">
+            <main className="relative z-10 pt-20 pb-32 px-6 max-w-6xl mx-auto">
                 <header className="max-w-3xl mb-20">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-6">
                         <Sparkles className="w-3 h-3" /> Curated Knowledge Base

@@ -114,7 +114,7 @@ const VoiceGenerator = () => {
 
     return (
         <div className="min-h-screen bg-[#080809] text-slate-300 font-['Inter',_sans-serif] p-4 md:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto relative z-10">
+            <div className="max-w-6xl mx-auto relative z-10">
                 
                 {/* Header */}
                 <header className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-2xl md:rounded-3xl backdrop-blur-md">

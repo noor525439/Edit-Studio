@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { Upload, Image as ImageIcon, CheckCircle, Loader2 } from 'lucide-react'; // Optional: install lucide-react
-import { getData } from '@/context/UserContext';
+import { getData } from '@/context/userContext';
 import { toast } from 'react-toastify';
 
 const UpdateProfile = () => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Zap, Briefcase } from "lucide-react";
-import { getData } from "@/context/UserContext";
+import { getData } from "@/context/userContext";
 import { apiGet, WORKFLOW_API } from "@/lib/api";
 import { isClient, CLIENT_ROLES } from "@/lib/roles";
 import StarRating from "@/components/StarRating";

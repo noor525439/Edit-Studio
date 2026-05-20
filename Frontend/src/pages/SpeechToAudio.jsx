@@ -81,7 +81,7 @@ const SpeechToText = () => {
         <div className="min-h-screen bg-[#050505] text-slate-300 font-['Inter']">
             {/* Header */}
             <nav className="border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+                <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                     <button onClick={() => navigate('/')} className="hover:text-white transition-colors flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
                         <ArrowLeft size={14} /> Studio
                     </button>
@@ -94,7 +94,7 @@ const SpeechToText = () => {
                 </div>
             </nav>
 
-            <main className="max-w-7xl mx-auto p-6 lg:p-12">
+            <main className="max-w-6xl mx-auto p-6 lg:p-12">
                 <div className="grid lg:grid-cols-12 gap-12">
                     
                     {/* Left Panel: Stats & Controls */}

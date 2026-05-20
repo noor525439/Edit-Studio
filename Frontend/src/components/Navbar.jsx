@@ -10,7 +10,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getData } from '@/context/UserContext'
+import { getData } from '@/context/userContext'
 import axios from 'axios'
 import { toast } from 'sonner'
 import NotificationBell from '@/components/NotificationBell'
@@ -50,7 +50,7 @@ const Navbar = () => {
 
     return (
         <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-2xl border-b border-slate-100/50">
-            <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div className="max-w-6xl mx-auto px-6 h-24 flex items-center justify-between">
 
                 {/* ── Logo ── */}
                 <Link to={user ? dashboardPath(user.role) : '/'} className="flex items-center gap-4 group">
@@ -87,13 +87,13 @@ const Navbar = () => {
                                     <FolderKanban size={15} strokeWidth={2.5} />
                                     Projects
                                 </NavLink>
-                                <NavLink to="/client/editors" className={linkStyles} end>
-                                    <Compass size={15} strokeWidth={2.5} />
-                                    Editors
-                                </NavLink>
                                 <NavLink to="/checkout" className={linkStyles} end>
                                     <CreditCard size={15} strokeWidth={2.5} />
                                     Payments
+                                </NavLink>
+                                <NavLink to="/client/editors" className={linkStyles} end>
+                                    <Compass size={15} strokeWidth={2.5} />
+                                    Editors
                                 </NavLink>
                             </>
                         )}

@@ -257,10 +257,10 @@ export const acceptApplication = async (req, res) => {
       io,
     });
     await notifyByEmail(
-      application.editorId?.email || (await User.findById(editorId))?.email,
-      "Your application was accepted",
-      `${currentUser.username} accepted your application for "${order.projectTitle}".`
-    );
+  editorId,
+  "Your application was accepted",
+  `${currentUser.username} accepted your application for "${order.projectTitle}".`
+);
 
     await logProjectActivity({
       orderId: order._id,
@@ -636,11 +636,11 @@ export const createSubmission = async (req, res) => {
       orderId: order._id,
       io,
     });
-    await notifyByEmail(
-      order.clientId,
-      "New project delivery",
-      `Your editor submitted deliverables for "${order.projectTitle}".`
-    );
+    // await notifyByEmail(
+    //   order.clientId,
+    //   "New project delivery",
+    //   `Your editor submitted deliverables for "${order.projectTitle}".`
+    // );
 
     await logProjectActivity({
       orderId: order._id,
@@ -716,12 +716,12 @@ export const requestRevision = async (req, res) => {
         orderId: order._id,
         io,
       });
-      const editor = await User.findById(order.assignedEditorId).select("email");
-      await notifyByEmail(
-        editor?.email,
-        "Revision requested",
-        `Client requested revisions for "${order.projectTitle}": ${reason}`
-      );
+      // const editor = await User.findById(order.assignedEditorId).select("email");
+     await notifyByEmail(
+  order.assignedEditorId,
+  "Revision requested",
+  `Client requested revisions for "${order.projectTitle}": ${reason}`
+);
     }
 
     await logProjectActivity({
@@ -768,12 +768,8 @@ export const confirmDelivery = async (req, res) => {
         orderId: order._id,
         io,
       });
-      const editor = await User.findById(order.assignedEditorId).select("email");
-      await notifyByEmail(
-        editor?.email,
-        "Project completed",
-        `Client confirmed delivery for "${order.projectTitle}". Great work!`
-      );
+      // const editor = await User.findById(order.assignedEditorId).select("email");
+      await notifyByEmail(order.assignedEditorId, "Project completed", `Client confirmed delivery for "${order.projectTitle}". Great work!`);
     }
 
     await createNotification({

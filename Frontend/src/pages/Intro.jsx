@@ -100,7 +100,7 @@ const Intro = () => {
             </section>
 
             {/* AI MEDIA SUITE SECTION (NEW ADDITION) */}
-            <section className="py-24 px-6 max-w-7xl mx-auto">
+            <section className="py-24 px-6 max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
                         <Zap className="w-3 h-3" /> Creative Automation
@@ -157,7 +157,7 @@ const Intro = () => {
             </section>
 
             {/* Bento Grid Features */}
-            <section id="features" className="py-24 px-6 max-w-7xl mx-auto">
+            <section id="features" className="py-24 px-6 max-w-6xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2 p-10 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/10 via-transparent to-transparent border border-white/5 relative overflow-hidden group">
                         <UserCheck className="w-10 h-10 text-indigo-400 mb-6" />
@@ -199,7 +199,7 @@ const Intro = () => {
             </section>
 
             {/* Mastery Academy Section */}
-            <section className="py-24 px-6 max-w-7xl mx-auto">
+            <section className="py-24 px-6 max-w-6xl mx-auto">
                 <div className="relative p-1 border border-white/5 rounded-[3rem] bg-gradient-to-b from-white/5 to-transparent">
                     <div className="bg-[#0A0A0B] rounded-[2.8rem] p-10 md:p-20 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none" />
@@ -269,7 +269,7 @@ const Intro = () => {
             </section>
 
             <footer className="py-20 px-6">
-                <div className="max-w-7xl mx-auto border-t border-white/5 pt-16">
+                <div className="max-w-6xl mx-auto border-t border-white/5 pt-16">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
                         <div className="space-y-4">
                             <span className="text-2xl font-black tracking-tighter text-white uppercase">EDITSTUDIO</span>

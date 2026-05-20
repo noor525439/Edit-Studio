@@ -65,6 +65,7 @@ const EditorTaskDetail = () => {
   const clientId = data?.order?.clientId?._id || data?.order?.clientId;
 
   return (
+    <div className="bg-gray-50">
     <RoleGuard allowedRoles={["editor", "admin"]}>
       <TaskDetailView
         mode="editor"
@@ -82,7 +83,7 @@ const EditorTaskDetail = () => {
       />
 
       {/* Project reviews — editor view */}
-      <div className="max-w-5xl mx-auto px-6 lg:px-10 pb-10 -mt-4">
+      <div className="max-w-6xl mx-auto pb-10 -mt-4">
         <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
           <h2 className="text-lg font-black text-slate-900 mb-1">Client reviews</h2>
           {reviewsLoading ? (
@@ -123,6 +124,7 @@ const EditorTaskDetail = () => {
         </section>
       </div>
     </RoleGuard>
+    </div>
   );
 };
 
