@@ -11,6 +11,7 @@ import ProjectActivity from "../models/ProjectActivityModel.js";
 import Notification from "../models/NotificationModel.js";
 import { calculatePaymentSplit } from "../utils/payment.js";
 import { emitToUsers } from "../utils/socket.js";
+import { logProjectActivity } from "../utils/projectActivity.js";
 
 
 

@@ -13,7 +13,7 @@ const AdminProjectDetail = () => {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await apiGet(`${WORKFLOW_API}/orders/${id}`);
+      const res = await apiGet(`${WORKFLOW_API}/orders/${id}/detail`);
       setData(res.data.data);
     } catch (err) {
       toast.error("Failed to load project");

@@ -45,7 +45,10 @@ const TaskDetailView = ({
   if (loading) return <p className="p-10 text-slate-400">Loading project…</p>;
   if (!data?.order) return <p className="p-10 text-slate-600">Project not found.</p>;
 
-  const order = data.order;
+  const order = data?.order || {};
+  const activity = data?.activity || [];
+  const comments = data?.comments || [];
+  const attachments = data?.attachments || [];
   const isAdmin = mode === "admin";
 
   const canApply = mode === "editor" && order.status === "published" && !order.assignedEditorId;
@@ -272,12 +275,12 @@ const TaskDetailView = ({
 
         {/* ── Client info card (editor view) ── */}
         {isAssignedEditor && order.clientId && (
-          <ClientInfoCard client={order.clientId} order={order} attachments={data.attachments} />
+          <ClientInfoCard client={order.clientId} order={order} attachments={attachments} />
         )}
 
         {/* Admin: full client info card */}
         {isAdmin && order.clientId && (
-          <ClientInfoCard client={order.clientId} order={order} attachments={data.attachments} />
+          <ClientInfoCard client={order.clientId} order={order} attachments={attachments} />
         )}
 
         {/* ── Task list ── */}
@@ -318,7 +321,7 @@ const TaskDetailView = ({
         {/* ── Attachments ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Attachments</h2>
-          <TaskAttachments attachments={data.attachments} />
+          <TaskAttachments attachments={attachments} />
         </section>
 
         {/* ── Submissions / Deliveries ── */}
@@ -343,13 +346,13 @@ const TaskDetailView = ({
         {/* ── Activity timeline ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Activity history</h2>
-          <ActivityTimeline activity={data.activity} />
+          <ActivityTimeline activity={activity} />
         </section>
 
         {/* ── Comments ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Messages</h2>
-          <TaskComments orderId={order._id} comments={data.comments} onPosted={onCommentPosted} />
+          <TaskComments orderId={order._id} comments={comments} onPosted={onCommentPosted} />
         </section>
 
         {/* ── Revision / Confirm delivery (client + admin) ── */}
