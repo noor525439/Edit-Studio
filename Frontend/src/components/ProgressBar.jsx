@@ -5,7 +5,7 @@ const ProgressBar = ({ percent = 0, showLabel = true, size = "md" }) => {
   return (
     <div className="w-full">
       {showLabel && (
-        <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">
+        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1.5">
           <span>Progress</span>
           <span className="text-green-600">{value}%</span>
         </div>

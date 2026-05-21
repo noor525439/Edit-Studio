@@ -52,7 +52,7 @@ const EditorRequirementsPage = () => {
                     <div className="inline-block px-4 py-1 rounded-full border border-blue-500/30 bg-blue-500/5 text-blue-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">
                         Talent Acquisition
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter leading-tight bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">
+                    <h1 className="text-5xl md:text-7xl font-bold mb-8 tracking-tighter leading-tight bg-gradient-to-b from-white to-gray-500 bg-clip-text text-transparent">
                         The Editor's <br /> Standard.
                     </h1>
                     <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed italic">
@@ -78,7 +78,7 @@ const EditorRequirementsPage = () => {
                                     {item.desc}
                                 </p>
                                 <div className="h-px w-full bg-gradient-to-r from-white/10 to-transparent mb-6"></div>
-                                <div className="flex items-center text-[10px] font-black uppercase tracking-widest text-gray-600 group-hover:text-blue-400 transition-colors">
+                                <div className="flex items-center text-[10px] font-bold uppercase tracking-widest text-gray-600 group-hover:text-blue-400 transition-colors">
                                     Technical Grade: Expert
                                 </div>
                             </div>

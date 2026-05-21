@@ -72,13 +72,13 @@ const ClientProjectCreate = () => {
               <Zap size={18} className="text-amber-500 shrink-0" fill="currentColor" />
               <p className="text-sm text-amber-800 font-medium">
                 You're hiring{" "}
-                <span className="font-black">{pendingEditorName || "an editor"}</span>.
+                <span className="font-bold">{pendingEditorName || "an editor"}</span>.
                 Create a project first — you'll be redirected back to complete the hire automatically.
               </p>
             </div>
           )}
 
-          <h1 className="text-3xl font-black text-slate-900 mb-2">Create Project</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Create Project</h1>
           <p className="text-slate-500 mb-8">
             {isHireFlow
               ? "Fill in your project details to continue with hiring."

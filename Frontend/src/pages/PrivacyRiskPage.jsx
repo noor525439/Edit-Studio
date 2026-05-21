@@ -33,12 +33,12 @@ const PrivacyRiskPage = () => {
           </button>
           <div className="flex items-center gap-2 bg-slate-800/40 backdrop-blur-md border border-slate-700/50 px-4 py-1.5 rounded-full">
             <Fingerprint size={14} className="text-indigo-400" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Encryption Active</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Encryption Active</span>
           </div>
         </nav>
 
         <header className="mb-16">
-          <h1 className="text-6xl font-black text-white tracking-tighter mb-4 italic">
+          <h1 className="text-6xl font-bold text-white tracking-tighter mb-4 italic">
             Privacy <span className="text-indigo-500 font-normal">Protocol</span>
           </h1>
           <p className="text-slate-400 max-w-xl leading-relaxed">
@@ -75,7 +75,7 @@ const PrivacyRiskPage = () => {
             
             <div className="flex items-center gap-3 mb-6">
               <div className="h-2 w-2 bg-red-500 rounded-full animate-pulse" />
-              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-red-500">Automated Erasure</h2>
+              <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-red-500">Automated Erasure</h2>
             </div>
 
             <h3 className="text-3xl font-bold text-white mb-4">Right to be Forgotten</h3>
@@ -117,7 +117,7 @@ const PrivacyRiskPage = () => {
           {/* Minimal Footer */}
           <footer className="mt-20 flex flex-col items-center gap-4">
              <div className="h-px w-20 bg-slate-800" />
-             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-600">
+             <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">
                Secure Terminal // Feb 2026 // v4.0.1
              </p>
           </footer>

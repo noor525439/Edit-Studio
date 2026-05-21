@@ -120,14 +120,14 @@ const VoiceGenerator = () => {
                 <header className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 bg-white/[0.02] border border-white/5 p-4 rounded-2xl md:rounded-3xl backdrop-blur-md">
                     <button 
                         onClick={() => navigate('/')}
-                        className="flex items-center gap-2 text-slate-500 hover:text-blue-400 transition-all font-black text-[10px] uppercase tracking-[0.3em]"
+                        className="flex items-center gap-2 text-slate-500 hover:text-blue-400 transition-all font-bold text-[10px] uppercase tracking-[0.3em]"
                     >
                         <ArrowLeft className="w-4 h-4" /> Studio Core
                     </button>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-full border border-white/5">
                             <div className={`w-1.5 h-1.5 rounded-full ${isSpeaking ? 'bg-green-500 animate-ping' : 'bg-blue-500 animate-pulse'}`} />
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
                                 {isSpeaking ? "Streaming" : "Ready"}
                             </span>
                         </div>
@@ -140,7 +140,7 @@ const VoiceGenerator = () => {
                     <div className="lg:col-span-8 space-y-6 md:space-y-8">
                         <div className="bg-[#111113] border border-white/10 rounded-[2rem] md:rounded-[3rem] p-5 md:p-8 shadow-2xl relative overflow-hidden">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xs md:text-sm font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                                <h2 className="text-xs md:text-sm font-bold text-white uppercase tracking-[0.2em] flex items-center gap-2">
                                     <AudioLines className="w-4 h-4 text-blue-500" /> Script Processor
                                 </h2>
                                 <span className="text-[9px] md:text-[10px] text-slate-600 font-bold uppercase tracking-widest">{text.length} Characters</span>
@@ -157,7 +157,7 @@ const VoiceGenerator = () => {
                                 <button 
                                     onClick={handleGenerate}
                                     disabled={!text || isSpeaking}
-                                    className="flex-1 flex items-center justify-center gap-3 px-8 py-4 md:py-5 rounded-2xl font-black text-[10px] md:text-[11px] uppercase tracking-widest transition-all shadow-xl bg-white text-black hover:bg-blue-600 hover:text-white disabled:bg-slate-900 disabled:text-slate-700"
+                                    className="flex-1 flex items-center justify-center gap-3 px-8 py-4 md:py-5 rounded-2xl font-bold text-[10px] md:text-[11px] uppercase tracking-widest transition-all shadow-xl bg-white text-black hover:bg-blue-600 hover:text-white disabled:bg-slate-900 disabled:text-slate-700"
                                 >
                                     <Sparkles className="w-4 h-4" /> Generate Voice
                                 </button>
@@ -174,12 +174,12 @@ const VoiceGenerator = () => {
                         <div className="space-y-4">
                             <div className="flex items-center gap-4 px-4">
                                 <History className="w-4 h-4 text-slate-600" />
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Session Tracks</h3>
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500">Session Tracks</h3>
                                 <div className="h-[1px] flex-1 bg-white/5" />
                             </div>
 
                             {tracks.length === 0 && (
-                                <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-[2rem] text-slate-700 text-[10px] font-black uppercase tracking-widest">
+                                <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-[2rem] text-slate-700 text-[10px] font-bold uppercase tracking-widest">
                                     No tracks generated yet
                                 </div>
                             )}
@@ -196,8 +196,8 @@ const VoiceGenerator = () => {
                                         <div className="overflow-hidden">
                                             <p className="text-white font-bold text-xs md:text-sm truncate italic opacity-80">"{track.preview}"</p>
                                             <div className="flex items-center gap-3 mt-1.5 md:mt-2">
-                                                <span className="text-[8px] md:text-[9px] font-black text-blue-500 uppercase tracking-widest truncate">{track.voiceName}</span>
-                                                <span className="text-[8px] md:text-[9px] font-black text-slate-600 uppercase tracking-widest whitespace-nowrap">{track.timestamp}</span>
+                                                <span className="text-[8px] md:text-[9px] font-bold text-blue-500 uppercase tracking-widest truncate">{track.voiceName}</span>
+                                                <span className="text-[8px] md:text-[9px] font-bold text-slate-600 uppercase tracking-widest whitespace-nowrap">{track.timestamp}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -227,13 +227,13 @@ const VoiceGenerator = () => {
                     {/* Sidebar */}
                     <div className="lg:col-span-4 space-y-6">
                         <div className="bg-[#111113] border border-white/10 rounded-[2rem] p-6 md:p-8 shadow-2xl lg:sticky lg:top-8">
-                            <h3 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-6 md:mb-8 flex items-center gap-2">
+                            <h3 className="text-white font-bold text-xs uppercase tracking-[0.2em] mb-6 md:mb-8 flex items-center gap-2">
                                 <Settings2 className="w-4 h-4 text-blue-500" /> Voice Config
                             </h3>
                             
                             <div className="space-y-6 md:space-y-8">
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Select Neural Voice</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">Select Neural Voice</label>
                                     <div className="relative group">
                                         <select 
                                             value={selectedVoiceIndex}
@@ -250,7 +250,7 @@ const VoiceGenerator = () => {
 
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Output Volume</label>
+                                        <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">Output Volume</label>
                                         <span className="text-[10px] font-bold text-blue-500">{Math.round(volume * 100)}%</span>
                                     </div>
                                     <div className="flex items-center gap-4">
@@ -267,14 +267,14 @@ const VoiceGenerator = () => {
 
                                 <button 
                                     onClick={() => { setText(""); stopVoice(); }}
-                                    className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2"
+                                    className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-2"
                                 >
                                     <Plus size={14} /> New Session
                                 </button>
                             </div>
 
                             <div className="mt-8 pt-8 border-t border-white/5">
-                                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-600 mb-2">
+                                <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-slate-600 mb-2">
                                     <span>AI Neural Engine</span>
                                     <span>v4.0.2 Stable</span>
                                 </div>
@@ -286,11 +286,11 @@ const VoiceGenerator = () => {
 
                         {/* <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2rem] p-6 md:p-8 text-white relative overflow-hidden group shadow-xl">
                             <div className="relative z-10">
-                                <h4 className="text-base md:text-lg font-black uppercase mb-2">Studio Export</h4>
+                                <h4 className="text-base md:text-lg font-bold uppercase mb-2">Studio Export</h4>
                                 <p className="text-[10px] md:text-[11px] text-blue-100/70 font-medium leading-relaxed mb-6">
                                     All generated tracks are stored in your local session. Export to WAV for high-fidelity audio.
                                 </p>
-                                <button className="w-full py-3 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-xl text-[9px] font-black transition-all border border-white/10 uppercase tracking-widest">
+                                <button className="w-full py-3 bg-black/20 hover:bg-black/40 backdrop-blur-md rounded-xl text-[9px] font-bold transition-all border border-white/10 uppercase tracking-widest">
                                     Bulk Export Tracks
                                 </button>
                             </div>

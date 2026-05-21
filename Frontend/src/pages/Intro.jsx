@@ -60,7 +60,7 @@ const Intro = () => {
                         <Sparkles className="w-3 h-3" /> Exclusively Vetted Talent
                     </div>
 
-                    <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.95] tracking-tight mb-8">
+                    <h1 className="text-5xl md:text-8xl font-bold text-white leading-[0.95] tracking-tight mb-8">
                         Precision Editing. <br />
                         <span className="bg-gradient-to-b from-white to-slate-500 bg-clip-text text-transparent">Zero Risk Involved.</span>
                     </h1>
@@ -105,7 +105,7 @@ const Intro = () => {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
                         <Zap className="w-3 h-3" /> Creative Automation
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter">AI Media <span className="text-indigo-400">Toolkit</span></h2>
+                    <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tighter">AI Media <span className="text-indigo-400">Toolkit</span></h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -208,7 +208,7 @@ const Intro = () => {
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-[0.3em]">
                                     Growth & Development
                                 </div>
-                                <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter leading-tight">
+                                <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tighter leading-tight">
                                     Unlock Professional <br />
                                     <span className="italic bg-gradient-to-r from-indigo-400 to-blue-500 bg-clip-text text-transparent">Creative Mastery</span>
                                 </h2>
@@ -238,7 +238,7 @@ const Intro = () => {
                                         </div>
                                         <button
                                             onClick={() => navigate('/top-tutors-channel')}
-                                            className="w-full bg-white text-black hover:bg-indigo-600 hover:text-white px-8 py-5 rounded-2xl font-black flex justify-center items-center gap-3 transition-all duration-300"
+                                            className="w-full bg-white text-black hover:bg-indigo-600 hover:text-white px-8 py-5 rounded-2xl font-bold flex justify-center items-center gap-3 transition-all duration-300"
                                         >
                                             Begin Your Journey <ArrowRight className="w-5 h-5" />
                                         </button>
@@ -261,7 +261,7 @@ const Intro = () => {
                             <img className='w-full h-full object-cover' src={myImg} alt="Founder" />
                         </div>
                         <div>
-                            <p className="text-white font-black text-xl tracking-tight">Waseeq</p>
+                            <p className="text-white font-bold text-xl tracking-tight">Waseeq</p>
                             <p className="text-indigo-400 text-sm font-bold uppercase tracking-widest">Founder, Edit Studio</p>
                         </div>
                     </div>
@@ -272,7 +272,7 @@ const Intro = () => {
                 <div className="max-w-6xl mx-auto border-t border-white/5 pt-16">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
                         <div className="space-y-4">
-                            <span className="text-2xl font-black tracking-tighter text-white uppercase">EDITSTUDIO</span>
+                            <span className="text-2xl font-bold tracking-tighter text-white uppercase">EDITSTUDIO</span>
                             <p className="text-slate-500 text-sm max-w-xs">
                                 The definitive marketplace for certified video post-production excellence.
                             </p>

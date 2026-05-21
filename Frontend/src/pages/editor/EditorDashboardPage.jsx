@@ -60,12 +60,12 @@ const EditorDashboardPage = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-black text-slate-900 mb-2">Editor Dashboard</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Editor Dashboard</h1>
               <p className="text-slate-500">Update progress on your active projects.</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl px-6 py-4 flex items-center gap-4">
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400">Your rating</p>
+                <p className="text-[10px] font-bold uppercase text-slate-400">Your rating</p>
                 <StarRating value={reviewStats.avgRating} readonly size={18} />
               </div>
               <TopRatedBadge show={reviewStats.isTopRated} />
@@ -94,8 +94,8 @@ const EditorDashboardPage = () => {
                 <div key={p._id} className="bg-white border border-slate-200 rounded-2xl p-6">
                   <div className="flex flex-wrap justify-between gap-3 mb-4">
                     <div>
-                      <h3 className="font-black text-lg text-slate-900">{p.projectTitle}</h3>
-                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${statusBadgeClass(p.status)}`}>
+                      <h3 className="font-bold text-lg text-slate-900">{p.projectTitle}</h3>
+                      <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusBadgeClass(p.status)}`}>
                         {statusLabel(p.status)}
                       </span>
                     </div>
@@ -123,7 +123,7 @@ const EditorDashboardPage = () => {
                     <button
                       type="button"
                       onClick={() => updateProgress(p._id, p.progressPercent || 0)}
-                      className="px-4 py-2 bg-slate-900 text-white text-xs font-black uppercase rounded-xl hover:bg-green-600"
+                      className="px-4 py-2 bg-slate-900 text-white text-xs font-bold uppercase rounded-xl hover:bg-green-600"
                     >
                       Save progress
                     </button>

@@ -47,7 +47,7 @@ const NotificationBell = () => {
       >
         <Bell size={18} className="text-slate-600" />
         {unread > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[9px] font-black rounded-full">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full">
             {unread > 9 ? "9+" : unread}
           </span>
         )}
@@ -58,7 +58,7 @@ const NotificationBell = () => {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-2 z-50 w-80 max-h-96 overflow-auto bg-white border border-slate-200 rounded-2xl shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-slate-100">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Notifications</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Notifications</span>
               {unread > 0 && (
                 <button onClick={markAll} className="text-[10px] font-bold text-green-600 hover:underline">
                   Mark all read

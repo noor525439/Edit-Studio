@@ -86,13 +86,13 @@ const VideoToAudio = () => {
             {/* Nav Bar */}
             <nav className="border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-50">
                 <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-                    <button onClick={() => navigate('/')} className="hover:text-white transition-all flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.2em]">
+                    <button onClick={() => navigate('/')} className="hover:text-white transition-all flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em]">
                         <ArrowLeft size={14} className="text-blue-500" /> Studio Dashboard
                     </button>
                     <div className="flex items-center gap-6">
                         <span className="hidden md:block text-[10px] font-bold text-slate-500 uppercase tracking-widest">Project: Alpha</span>
                         <div className="h-4 w-[1px] bg-white/10 hidden md:block" />
-                        <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-md border border-blue-500/20 text-[9px] font-black uppercase">Local Engine</div>
+                        <div className="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-md border border-blue-500/20 text-[9px] font-bold uppercase">Local Engine</div>
                     </div>
                 </div>
             </nav>
@@ -101,7 +101,7 @@ const VideoToAudio = () => {
                 {/* Stage 1: The Input Stage */}
                 <section className="mb-16">
                     <div className="flex flex-col items-center text-center mb-10">
-                        <h1 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tighter">
+                        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tighter">
                             WAV <span className="text-blue-600 italic">RIPPER</span>
                         </h1>
                         <p className="text-slate-500 text-sm max-w-lg leading-relaxed font-medium">
@@ -119,7 +119,7 @@ const VideoToAudio = () => {
                                 <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
                                     <Plus size={24} className="text-blue-500" />
                                 </div>
-                                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Drag & Drop Source</span>
+                                <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Drag & Drop Source</span>
                                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="video/*" className="hidden" />
                             </div>
                         ) : (
@@ -130,7 +130,7 @@ const VideoToAudio = () => {
                                     </div>
                                     <div className="overflow-hidden">
                                         <p className="text-xs font-bold text-white truncate">{videoFile.name}</p>
-                                        <p className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">Native Container Loaded</p>
+                                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">Native Container Loaded</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2 w-full md:w-auto px-2 md:px-0">
@@ -138,7 +138,7 @@ const VideoToAudio = () => {
                                     <button 
                                         onClick={processVideo}
                                         disabled={isProcessing}
-                                        className="flex-1 md:flex-none px-8 py-4 bg-white text-black hover:bg-blue-500 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3"
+                                        className="flex-1 md:flex-none px-8 py-4 bg-white text-black hover:bg-blue-500 hover:text-white rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3"
                                     >
                                         {isProcessing ? <RefreshCw size={14} className="animate-spin" /> : <Zap size={14} />}
                                         {isProcessing ? "Ripping..." : "Rip Audio"}
@@ -153,14 +153,14 @@ const VideoToAudio = () => {
                 <section>
                     <div className="flex items-center gap-4 mb-8">
                         <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Layers size={16} /></div>
-                        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-white">Extracted Assets</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-[0.3em] text-white">Extracted Assets</h2>
                         <div className="h-[1px] flex-1 bg-white/5" />
                         <span className="text-[10px] font-bold text-slate-600">{tracks.length} Samples</span>
                     </div>
 
                     {tracks.length === 0 ? (
                         <div className="h-48 rounded-[2rem] border border-dashed border-white/5 flex items-center justify-center">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-700">No tracks in current session</p>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-700">No tracks in current session</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,7 +188,7 @@ const VideoToAudio = () => {
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xs font-bold text-white truncate mb-1">{track.name}.wav</p>
                                             <div className="flex items-center gap-2">
-                                                <div className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-black text-slate-500 uppercase tracking-tighter">44.1kHz</div>
+                                                <div className="px-1.5 py-0.5 bg-white/5 rounded text-[8px] font-bold text-slate-500 uppercase tracking-tighter">44.1kHz</div>
                                                 <div className="text-[10px] font-bold text-blue-500/80">
                                                     {Math.floor(track.duration / 60)}:{(track.duration % 60).toFixed(0).padStart(2, '0')}
                                                 </div>
@@ -208,8 +208,8 @@ const VideoToAudio = () => {
                                             className="w-full h-1 bg-white/5 rounded-full appearance-none cursor-pointer accent-blue-500"
                                         />
                                         <div className="flex justify-between mt-2">
-                                            <span className="text-[8px] font-black text-slate-600">{Math.floor(track.currentTime / 60)}:{(track.currentTime % 60).toFixed(0).padStart(2, '0')}</span>
-                                            <span className="text-[8px] font-black text-slate-600">PCM AUDIO</span>
+                                            <span className="text-[8px] font-bold text-slate-600">{Math.floor(track.currentTime / 60)}:{(track.currentTime % 60).toFixed(0).padStart(2, '0')}</span>
+                                            <span className="text-[8px] font-bold text-slate-600">PCM AUDIO</span>
                                         </div>
                                     </div>
                                 </div>

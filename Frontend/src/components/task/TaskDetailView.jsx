@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star, User, CreditCard } from "lucide-react";
+import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star, User, CreditCard, ShieldCheck, Eye } from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import StarRating from "@/components/StarRating";
 import ActivityTimeline from "@/components/task/ActivityTimeline";
@@ -37,28 +37,45 @@ const TaskDetailView = ({
   onRejectApplication,
   onTaskRefresh,
   onCreateTask,
+  // Admin-only props
+  onAdminForceComplete,
+  onAdminCancelOrder,
+  onAdminReassignEditor,
 }) => {
   if (loading) return <p className="p-10 text-slate-400">Loading project…</p>;
   if (!data?.order) return <p className="p-10 text-slate-600">Project not found.</p>;
 
   const order = data.order;
+  const isAdmin = mode === "admin";
+
   const canApply = mode === "editor" && order.status === "published" && !order.assignedEditorId;
   const isAssignedEditor = mode === "editor" && order.assignedEditorId;
-  const pendingApps = (data.applications || []).filter((a) => a.status === "pending");
-  const showApplications = mode === "client" && !order.assignedEditorId && pendingApps.length > 0;
+
+  const allApps = data.applications || [];
+  const pendingApps = allApps.filter((a) => a.status === "pending");
+  const showApplications =
+    (mode === "client" && !order.assignedEditorId && pendingApps.length > 0) ||
+    (isAdmin && allApps.length > 0);
+
+  const applicationsToShow = isAdmin ? allApps : pendingApps;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
+    <div className="min-h-screen bg-[#F8FAFC] py-6 lg:py-10">
       <div className="max-w-6xl mx-auto">
+
         <Link to={backLink} className="text-sm font-bold text-green-600 hover:underline mb-6 inline-block">
           {backLabel}
         </Link>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6 shadow-sm">
+        {/* ── Main project card ── */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6">
           <div className="flex flex-wrap justify-between gap-4 mb-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-black text-slate-900">{order.projectTitle}</h1>
               <p className="text-slate-500 text-sm mt-2">{order.videoType} · {order.editingStyle}</p>
+              {isAdmin && (
+                <p className="text-[10px] font-mono text-slate-400 mt-1">ID: {order._id}</p>
+              )}
             </div>
             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase h-fit ${statusBadgeClass(order.status)}`}>
               {statusLabel(order.status)}
@@ -93,6 +110,7 @@ const TaskDetailView = ({
             <p className="text-slate-600 leading-relaxed">{order.instructions}</p>
           </div>
 
+          {/* Client info for editor */}
           {mode === "editor" && order.clientId && clientProfileLink && (
             <p className="mt-4 text-sm">
               Client:{" "}
@@ -102,6 +120,7 @@ const TaskDetailView = ({
             </p>
           )}
 
+          {/* Editor info for client */}
           {mode === "client" && order.assignedEditorId && (
             <p className="mt-4 text-sm text-slate-600">
               Editor: <strong>{order.assignedEditorId.username}</strong>
@@ -113,12 +132,62 @@ const TaskDetailView = ({
             </p>
           )}
 
+          {/* Admin: both client + editor info inline */}
+          {isAdmin && (
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {order.clientId && (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={order.clientId.avatar} />
+                    <AvatarFallback>{(order.clientId.username || "C").slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400">Client</p>
+                    <Link
+                      to={`/admin/users/${order.clientId._id}`}
+                      className="font-bold text-slate-800 hover:text-green-600 flex items-center gap-1"
+                    >
+                      {order.clientId.username}
+                      <Eye size={12} className="text-slate-400" />
+                    </Link>
+                    <p className="text-xs text-slate-500">{order.clientId.email}</p>
+                  </div>
+                </div>
+              )}
+              {order.assignedEditorId ? (
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={order.assignedEditorId.avatar} />
+                    <AvatarFallback>{(order.assignedEditorId.username || "E").slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400">Assigned Editor</p>
+                    <Link
+                      to={`/admin/users/${order.assignedEditorId._id}`}
+                      className="font-bold text-slate-800 hover:text-green-600 flex items-center gap-1"
+                    >
+                      {order.assignedEditorId.username}
+                      <Eye size={12} className="text-slate-400" />
+                    </Link>
+                    <p className="text-xs text-slate-500">{order.assignedEditorId.email}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-sm text-slate-400">
+                  No editor assigned yet
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Publish button (client) */}
           {order.status === "draft" && mode === "client" && onPublish && (
             <Button onClick={onPublish} className="mt-6 bg-green-600 hover:bg-green-700">
               Publish project
             </Button>
           )}
 
+          {/* Editor apply */}
           {canApply && (
             <div className="mt-8 pt-6 border-t border-slate-100">
               <h2 className="font-bold text-slate-800 mb-3">Apply for this task</h2>
@@ -136,15 +205,22 @@ const TaskDetailView = ({
           )}
         </div>
 
+        {/* ── Applications ── */}
         {showApplications && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-            <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">
-              Editor applications ({pendingApps.length})
+            <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest flex items-center gap-2">
+              {isAdmin && <ShieldCheck size={12} className="text-amber-500" />}
+              Editor applications ({applicationsToShow.length})
             </h2>
             <div className="space-y-4">
-              {pendingApps.map((app) => {
+              {applicationsToShow.map((app) => {
                 const ed = app.editorId;
                 const edId = ed?._id || ed;
+                const statusColors = {
+                  pending: "bg-yellow-100 text-yellow-700",
+                  accepted: "bg-green-100 text-green-700",
+                  rejected: "bg-red-100 text-red-700",
+                };
                 return (
                   <div key={app._id} className="flex flex-wrap items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                     <Avatar className="h-12 w-12">
@@ -153,27 +229,39 @@ const TaskDetailView = ({
                     </Avatar>
                     <div className="flex-1 min-w-[200px]">
                       <Link
-                        to={`/editor/profile/${edId}`}
+                        to={isAdmin ? `/admin/users/${edId}` : `/editor/profile/${edId}`}
                         className="font-bold text-slate-900 hover:text-green-600 flex items-center gap-1"
                       >
                         <User size={14} /> {ed?.username || "Editor"}
                       </Link>
                       <p className="text-xs text-slate-500 mt-0.5">{ed?.email}</p>
+                      {isAdmin && (
+                        <p className="text-[10px] font-mono text-slate-400 mt-0.5">ID: {edId}</p>
+                      )}
                       {app.message && (
                         <p className="text-sm text-slate-600 mt-2 italic">&quot;{app.message}&quot;</p>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700"
-                        onClick={() => onAcceptApplication?.(app._id)}
-                      >
-                        Accept
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => onRejectApplication?.(app._id)}>
-                        Reject
-                      </Button>
+                    <div className="flex flex-col items-end gap-2">
+                      {isAdmin && (
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${statusColors[app.status] || "bg-slate-100 text-slate-500"}`}>
+                          {app.status}
+                        </span>
+                      )}
+                      {(mode === "client" || isAdmin) && app.status === "pending" && (
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => onAcceptApplication?.(app._id)}
+                          >
+                            Accept
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => onRejectApplication?.(app._id)}>
+                            Reject
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -182,34 +270,44 @@ const TaskDetailView = ({
           </section>
         )}
 
+        {/* ── Client info card (editor view) ── */}
         {isAssignedEditor && order.clientId && (
           <ClientInfoCard client={order.clientId} order={order} attachments={data.attachments} />
         )}
 
-        {(data.tasks?.length > 0) && (
+        {/* Admin: full client info card */}
+        {isAdmin && order.clientId && (
+          <ClientInfoCard client={order.clientId} order={order} attachments={data.attachments} />
+        )}
+
+        {/* ── Task list ── */}
+        {data.tasks?.length > 0 && (
           <TaskListSection tasks={data.tasks} projectId={order._id} mode={mode} />
         )}
 
-        {isAssignedEditor && (
+        {/* ── Timer panel (editor + admin) ── */}
+        {(isAssignedEditor || isAdmin) && (
           <TaskTimerPanel
             tasks={data.tasks || []}
             orderId={order._id}
-            canControl
-            canCreate
+            canControl={isAssignedEditor}
+            canCreate={isAssignedEditor || isAdmin}
             onRefresh={onTaskRefresh}
             onCreateTask={onCreateTask}
           />
         )}
 
-        {mode === "client" && order.assignedEditorId && (
+        {/* ── Payment (client + admin) ── */}
+        {(mode === "client" || isAdmin) && order.assignedEditorId && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
             <h2 className="font-black text-slate-900 mb-3 uppercase text-[10px] tracking-widest flex items-center gap-2">
               <CreditCard size={14} className="text-green-600" /> Payment
+              {isAdmin && <span className="ml-1 text-amber-500">(Admin)</span>}
             </h2>
             <p className="text-sm text-slate-600 mb-4">
               Review amount, due date, and payment status for this project.
             </p>
-            <Link to={`/client/projects/${order._id}/payment`}>
+            <Link to={isAdmin ? `/admin/orders/${order._id}/payment` : `/client/projects/${order._id}/payment`}>
               <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
                 View payment details
               </Button>
@@ -217,11 +315,13 @@ const TaskDetailView = ({
           </section>
         )}
 
+        {/* ── Attachments ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Attachments</h2>
           <TaskAttachments attachments={data.attachments} />
         </section>
 
+        {/* ── Submissions / Deliveries ── */}
         {data.submissions?.length > 0 && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
             <h2 className="font-bold text-slate-800 mb-4">Editor deliveries</h2>
@@ -240,17 +340,20 @@ const TaskDetailView = ({
           </section>
         )}
 
+        {/* ── Activity timeline ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Activity history</h2>
           <ActivityTimeline activity={data.activity} />
         </section>
 
-        <section className="bg-white border border-slate-200 rounded-2xl p-6">
+        {/* ── Comments ── */}
+        <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Messages</h2>
           <TaskComments orderId={order._id} comments={data.comments} onPosted={onCommentPosted} />
         </section>
 
-        {mode === "client" && ["delivered", "revision_requested"].includes(order.status) && (
+        {/* ── Revision / Confirm delivery (client + admin) ── */}
+        {(mode === "client" || isAdmin) && ["delivered", "revision_requested"].includes(order.status) && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 space-y-4">
             <h2 className="font-bold text-slate-800">Review & delivery</h2>
             <div>
@@ -271,6 +374,7 @@ const TaskDetailView = ({
           </section>
         )}
 
+        {/* ── Star rating (client only) ── */}
         {mode === "client" && order.status === "completed" && !order.clientRating && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
             <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -290,15 +394,24 @@ const TaskDetailView = ({
           </section>
         )}
 
+        {/* ── Editor review display ── */}
         {data.editorReview && (
-          <section className="bg-green-50 border border-green-100 rounded-2xl p-6">
-            <p className="text-[10px] font-black uppercase text-green-700 mb-2">Your review</p>
-            <StarRating value={data.editorReview.rating} readonly size={20} />
+          <section className="bg-green-50 border border-green-100 rounded-2xl p-6 mb-6">
+            <p className="text-[10px] font-black uppercase text-green-700 mb-2">
+              {isAdmin ? "Client review (submitted)" : "Your review"}
+            </p>
+            <StarRating value={data.editorReview.rating} readOnly size={20} />
             {data.editorReview.feedback && (
               <p className="text-sm text-slate-600 mt-2 italic">"{data.editorReview.feedback}"</p>
             )}
+            {isAdmin && (
+              <p className="text-[10px] font-mono text-slate-400 mt-2">
+                Review ID: {data.editorReview._id} · Rating: {data.editorReview.rating}/5
+              </p>
+            )}
           </section>
         )}
+
       </div>
     </div>
   );

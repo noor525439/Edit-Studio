@@ -91,9 +91,9 @@ const EditorInfoForm = () => {
                     <div>
                         <div className="flex items-center gap-2 mb-1">
                             <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
-                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">System Configuration</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400">System Configuration</span>
                         </div>
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">
+                        <h1 className="text-4xl font-bold text-slate-900 tracking-tighter uppercase">
                             Editor <span className="text-green-600">Profile</span>
                         </h1>
                     </div>
@@ -104,7 +104,7 @@ const EditorInfoForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         
                         <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
                                 <User size={14} className="text-green-600" /> Legal Identity
                             </label>
                             <input 
@@ -117,7 +117,7 @@ const EditorInfoForm = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
                                 <Briefcase size={14} className="text-green-600" /> Designation
                             </label>
                             <input 
@@ -130,7 +130,7 @@ const EditorInfoForm = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
                                 <DollarSign size={14} className="text-green-600" /> Hourly Credits ($)
                             </label>
                             <input 
@@ -144,7 +144,7 @@ const EditorInfoForm = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
                                 <Award size={14} className="text-green-600" /> Sector Tenure
                             </label>
                             <select 
@@ -164,7 +164,7 @@ const EditorInfoForm = () => {
 
                         {/* Skills - Full Width */}
                         <div className="md:col-span-2 space-y-2">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
                                 <Sparkles size={14} className="text-green-600" /> Technology Stack (Comma Separated)
                             </label>
                             <input 
@@ -178,7 +178,7 @@ const EditorInfoForm = () => {
 
                         {/* Bio - Full Width */}
                         <div className="md:col-span-2 space-y-2">
-                            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
                                 <CheckCircle2 size={14} className="text-green-600" /> Professional Narrative
                             </label>
                             <textarea 
@@ -194,13 +194,13 @@ const EditorInfoForm = () => {
 
                     <div className="mt-12 flex items-center justify-between pt-8 border-t border-slate-50">
                         <div className="hidden sm:block">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Profile Status</p>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Profile Status</p>
                             <p className="text-xs font-bold text-green-600 uppercase tracking-widest mt-1">Ready for Sync</p>
                         </div>
                         <button 
                             type="submit"
                             disabled={loading}
-                            className="bg-slate-900 text-white flex items-center gap-3 px-10 py-4 rounded-2xl text-xs font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95"
+                            className="bg-slate-900 text-white flex items-center gap-3 px-10 py-4 rounded-2xl text-xs font-bold uppercase tracking-[0.2em] shadow-2xl hover:bg-green-600 hover:-translate-y-1 transition-all active:scale-95"
                         >
                         {loading ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />}
                         {loading ? "Processing..." : "Commit Changes"}

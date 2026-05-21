@@ -37,15 +37,15 @@ const EditorPublicProfile = () => {
         <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
           <div className="flex flex-col lg:flex-row gap-8">
             <aside className="lg:w-1/3">
-              <div className="w-28 h-28 mx-auto bg-gradient-to-br from-green-600 to-emerald-800 rounded-[2rem] flex items-center justify-center text-white text-5xl font-black">
+              <div className="w-28 h-28 mx-auto bg-gradient-to-br from-green-600 to-emerald-800 rounded-[2rem] flex items-center justify-center text-white text-5xl font-bold">
                 {editorProfile.name?.charAt(0)}
               </div>
               <div className="text-center mt-6">
-                <h1 className="text-2xl font-black text-slate-900">{editorProfile.name}</h1>
+                <h1 className="text-2xl font-bold text-slate-900">{editorProfile.name}</h1>
                 <p className="text-green-600 font-semibold text-sm mt-1">{editorProfile.role}</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-3">
                   <TopRatedBadge show={stats.isTopRated} />
-                  <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase rounded-full">
+                  <span className="px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase rounded-full">
                     {stats.completedProjects} projects done
                   </span>
                 </div>
@@ -53,11 +53,11 @@ const EditorPublicProfile = () => {
                   <StarRating value={stats.avgRating} readonly size={22} />
                   <span className="ml-2 text-xs text-slate-400">({stats.totalReviews} reviews)</span>
                 </div>
-                <p className="mt-4 text-2xl font-black text-slate-900">${editorProfile.rate}<span className="text-sm font-normal text-slate-400">/hr</span></p>
+                <p className="mt-4 text-2xl font-bold text-slate-900">${editorProfile.rate}<span className="text-sm font-normal text-slate-400">/hr</span></p>
                 {canHire && (
                   <button
                     onClick={() => setHireOpen(true)}
-                    className="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-green-600 flex items-center justify-center gap-2"
+                    className="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-green-600 flex items-center justify-center gap-2"
                   >
                     <Zap size={18} fill="currentColor" /> Hire Now
                   </button>
@@ -67,11 +67,11 @@ const EditorPublicProfile = () => {
 
             <section className="lg:w-2/3 space-y-8">
               <div>
-                <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">About</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">About</h2>
                 <p className="text-slate-600 leading-relaxed italic">"{editorProfile.bio}"</p>
               </div>
               <div>
-                <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Skills</h2>
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Skills</h2>
                 <div className="flex flex-wrap gap-2">
                   {editorProfile.skills?.map((s) => (
                     <span key={s} className="px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700">
@@ -81,7 +81,7 @@ const EditorPublicProfile = () => {
                 </div>
               </div>
               <div>
-                <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
+                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
                   <Briefcase size={14} /> Client reviews
                 </h2>
                 {reviews.length === 0 ? (

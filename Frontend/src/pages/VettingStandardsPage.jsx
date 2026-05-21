@@ -32,12 +32,12 @@ const VettingStandardsPage = () => {
           </button>
           <div className="flex items-center gap-2 bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 px-4 py-1.5 rounded-full">
             <Award size={14} className="text-emerald-400" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Top 1% Standards</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-400">Top 1% Standards</span>
           </div>
         </nav>
 
         <header className="mb-16">
-          <h1 className="text-6xl font-black text-white tracking-tighter mb-4 italic">
+          <h1 className="text-6xl font-bold text-white tracking-tighter mb-4 italic">
             Vetting <span className="text-emerald-500 font-normal">Standards</span>
           </h1>
           <p className="text-slate-400 max-w-xl leading-relaxed">
@@ -81,14 +81,14 @@ const VettingStandardsPage = () => {
             </div>
 
             <div className="relative z-10">
-              <h2 className="text-2xl font-black text-white mb-8 flex items-center gap-3">
+              <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                 <Sparkles className="text-emerald-400" /> The Approval Roadmap
               </h2>
               
               <div className="space-y-8">
                 <div className="flex gap-6">
                   <div className="flex flex-col items-center">
-                    <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center text-slate-900 font-black shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.4)]">1</div>
+                    <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center text-slate-900 font-bold shrink-0 shadow-[0_0_20px_rgba(16,185,129,0.4)]">1</div>
                     <div className="w-px h-full bg-slate-700 my-2" />
                   </div>
                   <div>
@@ -99,7 +99,7 @@ const VettingStandardsPage = () => {
 
                 <div className="flex gap-6">
                   <div className="flex flex-col items-center">
-                    <div className="h-10 w-10 border-2 border-slate-600 rounded-full flex items-center justify-center text-slate-400 font-black shrink-0">2</div>
+                    <div className="h-10 w-10 border-2 border-slate-600 rounded-full flex items-center justify-center text-slate-400 font-bold shrink-0">2</div>
                     <div className="w-px h-full bg-slate-700 my-2" />
                   </div>
                   <div>
@@ -110,7 +110,7 @@ const VettingStandardsPage = () => {
 
                 <div className="flex gap-6">
                   <div className="flex flex-col items-center">
-                    <div className="h-10 w-10 border-2 border-slate-600 rounded-full flex items-center justify-center text-slate-400 font-black shrink-0 text-sm">3</div>
+                    <div className="h-10 w-10 border-2 border-slate-600 rounded-full flex items-center justify-center text-slate-400 font-bold shrink-0 text-sm">3</div>
                   </div>
                   <div>
                     <h4 className="text-white font-bold mb-1">Final Admin Verification</h4>
@@ -124,7 +124,7 @@ const VettingStandardsPage = () => {
           {/* Requirements Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div className="bg-emerald-500/5 border border-emerald-500/10 p-8 rounded-[2.5rem]">
-                <h4 className="text-emerald-400 font-black text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                <h4 className="text-emerald-400 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
                   <CheckCircle2 size={14} /> Recommended Background
                 </h4>
                 <ul className="space-y-3 text-sm text-slate-300">
@@ -151,7 +151,7 @@ const VettingStandardsPage = () => {
           {/* Footer */}
           <footer className="mt-20 flex flex-col items-center gap-4">
              <div className="h-px w-20 bg-slate-800" />
-             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-600">
+             <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-slate-600">
                Elite Standards // Vetting Policy v2.0
              </p>
           </footer>

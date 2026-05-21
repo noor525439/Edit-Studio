@@ -46,7 +46,7 @@ const EditorSubmissions = () => {
     <RoleGuard allowedRoles={["editor", "admin"]}>
       <div className="min-h-screen bg-slate-50 p-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-black text-slate-900 mb-2">Submissions</h1>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Submissions</h1>
           <p className="text-slate-500 mb-8">Upload completed project files for client review.</p>
 
           <form onSubmit={submit} className="bg-white border border-slate-200 rounded-2xl p-6 mb-8 space-y-4">

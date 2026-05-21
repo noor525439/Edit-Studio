@@ -25,19 +25,19 @@ const ClientDashboard = () => {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <div>
-              <h1 className="text-3xl font-black text-slate-900">Client Dashboard</h1>
+              <h1 className="text-3xl font-bold text-slate-900">Client Dashboard</h1>
               <p className="text-slate-500 mt-2">Manage projects, hire editors, and approve deliveries.</p>
             </div>
             <div className="flex gap-3">
               <Link
                 to="/client/projects/create"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-green-600 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-green-600 transition-colors"
               >
                 <Plus size={16} /> New Project
               </Link>
               <Link
                 to="/client/editors"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest hover:border-green-500 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-bold uppercase tracking-widest hover:border-green-500 transition-colors"
               >
                 <Users size={16} /> Find Editors
               </Link>
@@ -84,8 +84,8 @@ const ClientDashboard = () => {
 
 const Stat = ({ label, value }) => (
   <div className="bg-white border border-slate-200 rounded-2xl p-6">
-    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</p>
-    <p className="text-3xl font-black text-slate-900 mt-1">{value}</p>
+    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{label}</p>
+    <p className="text-3xl font-bold text-slate-900 mt-1">{value}</p>
   </div>
 );
 

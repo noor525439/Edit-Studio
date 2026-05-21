@@ -23,7 +23,7 @@ const TaskListSection = ({ tasks = [], projectId, mode }) => {
 
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-      <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest flex items-center gap-2">
+      <h2 className="font-bold text-slate-900 mb-4 uppercase text-[10px] tracking-widest flex items-center gap-2">
         <ListTodo size={14} className="text-green-600" /> Tasks
       </h2>
       <ul className="space-y-2">

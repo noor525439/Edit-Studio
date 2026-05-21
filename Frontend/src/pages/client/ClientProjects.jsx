@@ -22,10 +22,10 @@ const ClientProjects = () => {
       <div className="min-h-screen bg-[#F8FAFC] p-6 lg:p-10">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-black text-slate-900">My Projects</h1>
+            <h1 className="text-3xl font-bold text-slate-900">My Projects</h1>
             <Link
               to="/client/projects/create"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-600"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-green-600"
             >
               <Plus size={16} /> Create
             </Link>

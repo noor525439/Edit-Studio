@@ -91,7 +91,7 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
               <Zap size={20} fill="currentColor" />
             </div>
             <div>
-              <h2 className="font-black text-slate-900">Instant Hire</h2>
+              <h2 className="font-bold text-slate-900">Instant Hire</h2>
               <p className="text-xs text-slate-500">{editorName}</p>
             </div>
           </div>
@@ -107,7 +107,7 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
 
           {/* Project selector */}
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block">
               Select a project
             </label>
 
@@ -166,7 +166,7 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
           <Button
             onClick={handleConfirm}
             disabled={loading || fetching}
-            className={`w-full py-6 rounded-2xl font-black uppercase tracking-widest text-xs transition-colors ${
+            className={`w-full py-6 rounded-2xl font-bold uppercase tracking-widest text-xs transition-colors ${
               noProjects
                 ? "bg-slate-900 hover:bg-slate-800"
                 : "bg-slate-900 hover:bg-green-600"

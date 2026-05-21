@@ -1,6 +1,7 @@
 import express from "express";
 import { isAuthenticated } from "../middleware/authenticated.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
+import { isAdmin } from "../middleware/isAdmin.js";
 import {
   getAdminCommissionOverview,
   createOrder,
@@ -29,6 +30,8 @@ import {
   getAllReviewsAdmin,
   editReview,
   deleteReview,
+  getAdminActivities,
+  getAdminOverview,
 } from "../Controllers/workflowController.js";
 import {
   getOrderById,
@@ -91,6 +94,8 @@ router.post("/reviews", isAuthenticated, authorizeRole("client"), createReview);
 router.get("/gig/editor/:editorUserId", isAuthenticated, getEditorGigProfile);
 router.get("/admin/commissions", isAuthenticated, authorizeRole("admin"), getAdminCommissionOverview);
 router.get("/admin/users", isAuthenticated, authorizeRole("admin"), getAdminUsers);
+router.get("/admin/activities", isAuthenticated, isAdmin, getAdminActivities);
+router.get("/admin/overview", isAuthenticated, isAdmin, getAdminOverview);
 
 router.get("/marketplace", isAuthenticated, getMarketplaceTasks);
 router.get("/orders/:orderId", isAuthenticated, getOrderById);

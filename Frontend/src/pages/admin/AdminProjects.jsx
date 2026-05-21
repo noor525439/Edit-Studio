@@ -17,14 +17,14 @@ const AdminProjects = () => {
     <RoleGuard allowedRoles={["admin"]}>
       <div className="min-h-screen bg-slate-50 p-8">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-black text-slate-900 mb-2">Admin — Projects</h1>
+          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Admin — Projects</h1>
           <p className="text-slate-500 mb-8">Overview of all platform projects.</p>
           {loading ? (
             <p className="text-slate-400">Loading…</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {projects.map((p) => (
-                <ProjectCard key={p._id} project={p} detailPath={`/client/projects/${p._id}`} showClient />
+                <ProjectCard key={p._id} project={p} detailPath={`/admin/projects/${p._id}`} showClient />
               ))}
             </div>
           )}

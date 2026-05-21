@@ -79,7 +79,7 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
 
   if (!localTasks.length && !canCreate) {
     return (
-      <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+      <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 shadow-xl">
         <p className="text-sm text-slate-400">No tasks yet for this project.</p>
       </section>
     );
@@ -87,7 +87,7 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
 
   return (
     <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-      <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest flex items-center gap-2">
+      <h2 className="font-bold text-slate-900 mb-4 uppercase text-[10px] tracking-widest flex items-center gap-2">
         <Clock size={14} className="text-green-600" /> Task Panel
       </h2>
 
@@ -135,7 +135,7 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
                 </div>
                 <div className="flex items-center gap-2">
                   {overdue && !isDone && (
-                    <Badge variant="destructive" className="text-[10px] uppercase font-black">
+                    <Badge variant="destructive" className="text-[10px] uppercase font-bold">
                       <AlertTriangle size={10} className="mr-1" /> Overdue
                     </Badge>
                   )}
@@ -146,7 +146,7 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
               </div>
 
               <div className="flex flex-wrap items-center gap-4">
-                <div className="text-2xl font-mono font-black text-slate-900 tabular-nums">
+                <div className="text-2xl font-mono font-bold text-slate-900 tabular-nums">
                   {isDone ? fmt(elapsed) : fmt(remaining)}
                   <span className="text-[10px] font-sans font-bold text-slate-400 ml-2 uppercase">
                     {isDone ? "actual" : "remaining"}

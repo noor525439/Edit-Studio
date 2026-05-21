@@ -7,6 +7,8 @@ import ChatThread from "../models/ChatThreadModel.js";
 import Payment from "../models/PaymentModel.js";
 import Review from "../models/ReviewModel.js";
 import { User } from "../models/Usermodels.js";
+import ProjectActivity from "../models/ProjectActivityModel.js";
+import Notification from "../models/NotificationModel.js";
 import { calculatePaymentSplit } from "../utils/payment.js";
 import { emitToUsers } from "../utils/socket.js";
 
@@ -202,6 +204,42 @@ export const updateOrderProgress = async (req, res) => {
     }
     await order.save();
 
+    // Notify client about progress stage change
+    const io = req.app.get("io");
+    await Notification.create({
+      userId: order.clientId,
+      type: "progress_updated",
+      title: "Project status updated",
+      message: `Project "${order.projectTitle}" updated stage to "${progressStage}".`,
+      orderId: order._id,
+    });
+
+    // Emit socket update to client (FIXED: Backtick syntax closed properly)
+    if (io) {
+      emitToUsers([String(order.clientId)], "workflow:notification", {
+        type: "progress_updated",
+        title: "Project status updated",
+        message: `Project "${order.projectTitle}" updated stage to "${progressStage}".`,
+        orderId: order._id,
+        read: false,
+        createdAt: new Date(),
+      });
+    }
+
+    // Notify admins (FIXED: Changed req.userId to currentUser.username for accurate logging)
+    const admins = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      admins.map((a) =>
+        Notification.create({
+          userId: a._id,
+          type: "progress_updated",
+          title: "Project status updated",
+          message: `Project "${order.projectTitle}" changed to "${progressStage}" by ${currentUser.username || 'system'}.`,
+          orderId: order._id,
+        })
+      )
+    );
+
     return res.status(200).json({ success: true, data: order });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -275,6 +313,49 @@ export const createTask = async (req, res) => {
       estimatedDuration: duration,
     });
 
+    // Log activity and notify relevant parties
+    await logProjectActivity({
+      orderId: order._id,
+      actorId: currentUser._id,
+      actorName: currentUser.username,
+      actorRole: currentUser.role,
+      action: "milestone_created",
+      details: `Task/milestone "${task.title}" created`,
+      meta: { taskId: task._id },
+    });
+
+    const io = req.app.get("io");
+    // Notify client
+    await Notification.create({
+      userId: order.clientId,
+      type: "milestone_created",
+      title: "Milestone added",
+      message: `A milestone "${task.title}" was added to "${order.projectTitle}".`,
+      orderId: order._id,
+    });
+    if (io) emitToUsers([String(order.clientId)], "workflow:notification", {
+      type: "milestone_created",
+      title: "Milestone added",
+      message: `A milestone "${task.title}" was added to "${order.projectTitle}".`,
+      orderId: order._id,
+      read: false,
+      createdAt: new Date(),
+    });
+
+    // Notify admins
+    const adminsNotify = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      adminsNotify.map((a) =>
+        Notification.create({
+          userId: a._id,
+          type: "milestone_created",
+          title: "Milestone added",
+          message: `Milestone "${task.title}" added to "${order.projectTitle}".`,
+          orderId: order._id,
+        })
+      )
+    );
+
     return res.status(201).json({ success: true, data: enrichTask(task) });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -312,6 +393,46 @@ export const getTasks = async (req, res) => {
     );
 
     return res.status(200).json({ success: true, data: tasks.map(enrichTask) });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getAdminActivities = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (String(currentUser.role) !== "admin") return res.status(403).json({ success: false, message: "Admin only" });
+
+    const { limit = 200, offset = 0 } = req.query;
+    const acts = await ProjectActivity.find()
+      .populate("orderId", "projectTitle status progressPercent")
+      .populate("actorId", "username email role")
+      .sort({ createdAt: -1 })
+      .skip(Number(offset))
+      .limit(Math.min(500, Number(limit)));
+
+    return res.status(200).json({ success: true, data: acts });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getAdminOverview = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (String(currentUser.role) !== "admin") return res.status(403).json({ success: false, message: "Admin only" });
+
+    const totalUsers = await User.countDocuments();
+    const totalProjects = await ProjectOrder.countDocuments();
+    const openProjects = await ProjectOrder.countDocuments({ status: { $in: ["published", "project_started", "in_progress"] } });
+    const pendingEditors = await User.countDocuments({ role: "editor", isApproved: false });
+
+    return res.status(200).json({
+      success: true,
+      data: { totalUsers, totalProjects, openProjects, pendingEditors },
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -365,6 +486,51 @@ export const updateTaskTimer = async (req, res) => {
     }
 
     await task.save();
+    // If task completed, notify client and admins
+    if (action === "complete") {
+      await logProjectActivity({
+        orderId: task.orderId,
+        actorId: currentUser._id,
+        actorName: currentUser.username,
+        actorRole: currentUser.role,
+        action: "milestone_completed",
+        details: `Milestone "${task.title}" completed`,
+        meta: { taskId: task._id },
+      });
+
+      const io = req.app.get("io");
+      const order = await ProjectOrder.findById(task.orderId);
+      if (order) {
+        await Notification.create({
+          userId: order.clientId,
+          type: "milestone_released",
+          title: "Milestone completed",
+          message: `Milestone "${task.title}" was completed for "${order.projectTitle}".`,
+          orderId: order._id,
+        });
+        if (io) emitToUsers([String(order.clientId)], "workflow:notification", {
+          type: "milestone_released",
+          title: "Milestone completed",
+          message: `Milestone "${task.title}" was completed for "${order.projectTitle}".`,
+          orderId: order._id,
+          read: false,
+          createdAt: new Date(),
+        });
+
+        const adminsList = await User.find({ role: "admin" }).select("_id username");
+        await Promise.all(
+          adminsList.map((a) =>
+            Notification.create({
+              userId: a._id,
+              type: "milestone_released",
+              title: "Milestone completed",
+              message: `Milestone "${task.title}" completed for "${order.projectTitle}".`,
+              orderId: order._id,
+            })
+          )
+        );
+      }
+    }
     return res.status(200).json({ success: true, data: enrichTask(task) });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

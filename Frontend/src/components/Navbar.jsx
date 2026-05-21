@@ -42,7 +42,7 @@ const Navbar = () => {
     }
 
     const linkStyles = ({ isActive }) => `
-        flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all duration-500
+        flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-[0.15em] transition-all duration-500
         ${isActive
             ? "bg-slate-900 text-white shadow-[0_10px_20px_rgba(0,0,0,0.1)] scale-105"
             : "text-green-700 hover:bg-white hover:text-slate-900 hover:shadow-sm"}
@@ -62,11 +62,11 @@ const Navbar = () => {
                         </div>
                     </div>
                     <div className="flex flex-col justify-center">
-                        <h1 className='font-black text-2xl tracking-tighter text-slate-900 flex items-center gap-1'>
+                        <h1 className='font-bold text-2xl tracking-tighter text-slate-900 flex items-center gap-1'>
                             EDIT
-                            <span className="bg-gradient-to-br from-green-400 to-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-black uppercase">OS</span>
+                            <span className="bg-gradient-to-br from-green-400 to-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase">OS</span>
                         </h1>
-                        <span className='text-[10px] font-black text-slate-400 uppercase tracking-[0.45em]'>STUDIO</span>
+                        <span className='text-[10px] font-bold text-slate-400 uppercase tracking-[0.45em]'>STUDIO</span>
                     </div>
                 </Link>
 
@@ -156,20 +156,20 @@ const Navbar = () => {
                                             alt={user?.username}
                                             className="object-cover w-full h-full"
                                         />
-                                        <AvatarFallback className="bg-slate-900 text-white font-black text-xs uppercase">
+                                        <AvatarFallback className="bg-slate-900 text-white font-bold text-xs uppercase">
                                             {user?.username?.[0] || "U"}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="hidden lg:block text-left">
-                                        <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{user?.username}</p>
-                                        <p className="text-[9px] text-green-600 font-black uppercase">{user?.role}</p>
+                                        <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{user?.username}</p>
+                                        <p className="text-[9px] text-green-600 font-bold uppercase">{user?.role}</p>
                                     </div>
                                     <ChevronDown className="h-4 w-4 text-slate-300 group-hover:text-green-600 transition-all" />
                                 </div>
                             </DropdownMenuTrigger>
 
                             <DropdownMenuContent align="end" className="w-64 p-3 rounded-2xl">
-                                <DropdownMenuLabel className="text-[9px] font-black uppercase text-slate-400">Active Session</DropdownMenuLabel>
+                                <DropdownMenuLabel className="text-[9px] font-bold uppercase text-slate-400">Active Session</DropdownMenuLabel>
                                 <p className="px-2 text-sm font-bold truncate">{user?.username}</p>
                                 <DropdownMenuSeparator />
 
@@ -199,9 +199,9 @@ const Navbar = () => {
                         </DropdownMenu>
                     ) : (
                         <div className="flex items-center gap-4">
-                            <Link to="/login" className="text-[11px] font-black uppercase text-slate-400 hover:text-slate-600">Login</Link>
+                            <Link to="/login" className="text-[11px] font-bold uppercase text-slate-400 hover:text-slate-600">Login</Link>
                             <Link to="/signup">
-                                <button className="bg-slate-900 text-white px-8 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-green-600 transition-all">
+                                <button className="bg-slate-900 text-white px-8 py-3.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-green-600 transition-all">
                                     Initialize
                                 </button>
                             </Link>

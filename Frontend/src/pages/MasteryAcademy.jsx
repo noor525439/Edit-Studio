@@ -79,7 +79,7 @@ const MasteryAcademy = () => {
                     Back to Studio
                 </button>
                 <div className="flex items-center gap-2">
-                    <span className="text-xl font-black tracking-tighter text-white uppercase">Academy</span>
+                    <span className="text-xl font-bold tracking-tighter text-white uppercase">Academy</span>
                 </div>
             </nav>
 
@@ -89,7 +89,7 @@ const MasteryAcademy = () => {
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-6">
                         <Sparkles className="w-3 h-3" /> Curated Knowledge Base
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-black text-white leading-[0.9] tracking-tighter mb-8">
+                    <h1 className="text-5xl md:text-7xl font-bold text-white leading-[0.9] tracking-tighter mb-8">
                         The Master’s <br />
                         <span className="bg-gradient-to-r from-indigo-400 to-blue-500 bg-clip-text text-transparent italic">Watchlist.</span>
                     </h1>
@@ -122,7 +122,7 @@ const MasteryAcademy = () => {
                                     </div>
                                 </div>
 
-                                <h3 className="text-2xl font-black text-white mb-2">{channel.name}</h3>
+                                <h3 className="text-2xl font-bold text-white mb-2">{channel.name}</h3>
                                 <p className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4">
                                     {channel.specialty}
                                 </p>
@@ -134,7 +134,7 @@ const MasteryAcademy = () => {
                                     href={channel.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white text-black font-black text-sm group-hover:bg-indigo-600 group-hover:text-white transition-all active:scale-95"
+                                    className="inline-flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-white text-black font-bold text-sm group-hover:bg-indigo-600 group-hover:text-white transition-all active:scale-95"
                                 >
                                     Open Channel <ExternalLink className="w-4 h-4" />
                                 </a>
@@ -152,7 +152,7 @@ const MasteryAcademy = () => {
                     </p>
                     <button
                         onClick={() => navigate('/login')}
-                        className="relative z-10 bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black transition-all"
+                        className="relative z-10 bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold transition-all"
                     >
                         Apply for Vetting
                     </button>

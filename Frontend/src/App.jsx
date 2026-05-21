@@ -42,6 +42,10 @@ import EditorPublicProfile from "./pages/editor/EditorPublicProfile"
 import EditorGigs from "./pages/editor/EditorGigs"
 import AdminProjects from "./pages/admin/AdminProjects"
 import AdminDashboard from "./pages/admin/AdminDashboard"
+import AdminProjectDetail from "./pages/admin/AdminProjectDetail"
+import AdminNotifications from "./pages/admin/AdminNotifications"
+import AdminActivities from "./pages/admin/AdminActivities"
+import ClientNotifications from "./pages/client/ClientNotifications"
 import { dashboardPath } from "./lib/roles"
 import { getData } from "./context/userContext"
 
@@ -81,7 +85,15 @@ const router = createBrowserRouter([
   // Admin role routes
    { path: '/admin/dashboard', element: withNav(<AdminDashboard />)},
   { path: '/admin/projects', element: withNav(<AdminProjects />) },
+  { path: '/admin/projects/:id', element: withNav(<AdminProjectDetail />) },
+  { path: '/admin/activities', element: withNav(<AdminActivities />) },
+  { path: '/client/notifications', element: withNav(<ClientNotifications />) },
+  { path: '/admin/notifications', element: withNav(<AdminNotifications />) },
   { path: '/admin/messages', element: withNav(<AdminMessages />) },
+
+  // Fallbacks for unknown routes
+  { path: '*', element: <Navigate to="/" replace /> },
+  { path: '/admin/orders/:projectId/payment', element: withNav(<ClientPaymentReview />) },
 
   // Legacy redirects (role-prefixed URLs)
   { path: '/freelancer-dashboard', element: <Navigate to="/client/dashboard" replace /> },

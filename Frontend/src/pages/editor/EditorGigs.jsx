@@ -32,7 +32,7 @@ const EditorGigs = () => {
     <div className="min-h-screen bg-slate-50 p-6 md:p-12">
       <div className="max-w-6xl mx-auto">
         <div className="mb-10">
-          <h1 className="text-3xl font-black text-slate-900">Editor Gigs</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Editor Gigs</h1>
           <p className="text-slate-500 mt-2">
             Sorted by highest rating — top editors appear first.
           </p>
@@ -54,7 +54,7 @@ const EditorGigs = () => {
                 className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-xl hover:border-green-300/50 transition-all"
               >
                 <div className="flex justify-between items-start mb-4">
-                  <div className="h-14 w-14 bg-green-100 rounded-2xl flex items-center justify-center text-green-700 font-black text-xl">
+                  <div className="h-14 w-14 bg-green-100 rounded-2xl flex items-center justify-center text-green-700 font-bold text-xl">
                     {ed.name?.charAt(0)}
                   </div>
                   <TopRatedBadge show={ed.isTopRated} className="scale-90 origin-right" />
@@ -68,7 +68,7 @@ const EditorGigs = () => {
                   <span className="text-[10px] text-slate-400 font-bold">({ed.totalReviews})</span>
                 </div>
 
-                <p className="text-[10px] text-green-600 font-black uppercase mt-2 tracking-wider">
+                <p className="text-[10px] text-green-600 font-bold uppercase mt-2 tracking-wider">
                   {ed.completedProjects} completed · ${ed.rate}/hr
                 </p>
 
@@ -82,7 +82,7 @@ const EditorGigs = () => {
                   {user && isClient(user.role) && (
                     <Link
                       to={`/client/hire/${ed._id}`}
-                      className="w-full py-2.5 border-2 border-green-600 text-green-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-50 flex items-center justify-center gap-2"
+                      className="w-full py-2.5 border-2 border-green-600 text-green-700 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-green-50 flex items-center justify-center gap-2"
                     >
                       <Zap size={14} fill="currentColor" /> Hire Now
                     </Link>

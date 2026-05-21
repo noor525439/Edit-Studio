@@ -44,7 +44,7 @@ const AboutPage = () => {
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-xs font-bold tracking-[0.2em] uppercase">Return</span>
         </button>
-        <div className="text-white font-black tracking-tighter text-xl">ES<span className="text-cyan-500">.</span></div>
+        <div className="text-white font-bold tracking-tighter text-xl">ES<span className="text-cyan-500">.</span></div>
       </nav>
 
       {/* Hero Section */}
@@ -54,7 +54,7 @@ const AboutPage = () => {
             <Sparkles size={12} /> University of the Punjab FYP
           </div>
           
-          <h1 className="text-7xl md:text-[10rem] font-black mb-12 tracking-tighter text-white leading-[0.75]">
+          <h1 className="text-7xl md:text-[10rem] font-bold mb-12 tracking-tighter text-white leading-[0.75]">
             EDIT<br />
             <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 animate-gradient-x">
               STUDIO
@@ -103,7 +103,7 @@ const AboutPage = () => {
                     <ExternalLink size={16} className="text-slate-700 group-hover:text-white transition-colors" />
                   </div>
 
-                  <h3 className="text-[10px] font-black text-cyan-500 tracking-[0.4em] uppercase mb-4">
+                  <h3 className="text-[10px] font-bold text-cyan-500 tracking-[0.4em] uppercase mb-4">
                     {member.role}
                   </h3>
                   <h2 className="text-3xl font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-500">
@@ -125,7 +125,7 @@ const AboutPage = () => {
       <section className="py-32 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-6 mb-16">
-            <h3 className="text-sm font-black tracking-[0.5em] text-slate-600 uppercase whitespace-nowrap">Technologies We Use</h3>
+            <h3 className="text-sm font-bold tracking-[0.5em] text-slate-600 uppercase whitespace-nowrap">Technologies We Use</h3>
             <div className="h-[1px] w-full bg-white/5"></div>
           </div>
           
@@ -146,7 +146,7 @@ const AboutPage = () => {
       <footer className="py-20 border-t border-white/5 bg-black/40 backdrop-blur-3xl">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-left">
-            <div className="text-white font-black tracking-tighter text-2xl mb-2">EDIT STUDIO.</div>
+            <div className="text-white font-bold tracking-tighter text-2xl mb-2">EDIT STUDIO.</div>
             <p className="text-slate-500 text-[10px] uppercase tracking-widest font-bold">Department of IT &bull; Punjab University</p>
           </div>
           <div className="flex gap-12 text-[10px] font-bold tracking-widest uppercase text-slate-500">

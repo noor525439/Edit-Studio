@@ -192,7 +192,7 @@ const ClientProjectDetail = () => {
       {/* Client Review Panel */}
       <div className="max-w-6xl mx-auto pb-10 bg-gray-50">
         <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900 mb-1">Client Review Panel</h2>
+          <h2 className="text-xl font-bold text-slate-900 mb-1">Client Review Panel</h2>
           <p className="text-sm text-slate-500 mb-2">
             Share your experience working with the editor on this project.
           </p>
@@ -203,7 +203,7 @@ const ClientProjectDetail = () => {
             <>
               {myPanelReview && !editingPanel ? (
                 <div className="bg-green-50 border border-green-100 rounded-xl p-5 mb-4">
-                  <p className="text-[10px] font-black uppercase text-green-700 mb-2">Your review</p>
+                  <p className="text-[10px] font-bold uppercase text-green-700 mb-2">Your review</p>
                   <StarRating value={myPanelReview.rating} readonly size={22} />
                   <p className="text-sm text-slate-600 mt-3 italic">
                     &quot;{myPanelReview.comment || myPanelReview.feedback}&quot;

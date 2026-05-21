@@ -262,6 +262,21 @@ export const acceptApplication = async (req, res) => {
   `${currentUser.username} accepted your application for "${order.projectTitle}".`
 );
 
+    // Notify all admins about the hire
+    const admins = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      admins.map((a) =>
+        createNotification({
+          userId: a._id,
+          type: "application_accepted",
+          title: "Editor hired",
+          message: `${currentUser.username} hired ${application.editorId?.username || "an editor"} for "${order.projectTitle}".`,
+          orderId: order._id,
+          io,
+        })
+      )
+    );
+
     await logProjectActivity({
       orderId: order._id,
       actorId: currentUser._id,
@@ -517,6 +532,21 @@ export const instantHire = async (req, res) => {
       io,
     });
 
+    // Notify admins about the instant hire
+    const admins = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      admins.map((a) =>
+        createNotification({
+          userId: a._id,
+          type: "instant_hire",
+          title: "Editor hired",
+          message: `${currentUser.username} hired ${editor.username} for "${order.projectTitle}".`,
+          orderId: order._id,
+          io,
+        })
+      )
+    );
+
 // ✅ email ki jagah _id pass karo
 await notifyByEmail(
   editor._id,
@@ -581,6 +611,23 @@ export const updateProgressPercent = async (req, res) => {
       orderId: order._id,
       io,
     });
+
+    // If project is delivered, notify admins as well
+    if (order.status === "delivered") {
+      const admins = await User.find({ role: "admin" }).select("_id username");
+      await Promise.all(
+        admins.map((a) =>
+          createNotification({
+            userId: a._id,
+            type: "progress_updated",
+            title: "Project delivered",
+            message: `${currentUser.username} updated progress for "${order.projectTitle}" to ${percent}% (delivered).`,
+            orderId: order._id,
+            io,
+          })
+        )
+      );
+    }
 
     await logProjectActivity({
       orderId: order._id,
@@ -781,6 +828,21 @@ export const confirmDelivery = async (req, res) => {
       io,
     });
 
+    // Notify admins about the completed project
+    const admins = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      admins.map((a) =>
+        createNotification({
+          userId: a._id,
+          type: "project_completed",
+          title: "Project completed",
+          message: `${currentUser.username} confirmed delivery for "${order.projectTitle}".`,
+          orderId: order._id,
+          io,
+        })
+      )
+    );
+
     await logProjectActivity({
       orderId: order._id,
       actorId: currentUser._id,
@@ -930,3 +992,4 @@ export const getAdminUsers = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+

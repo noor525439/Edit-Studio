@@ -166,7 +166,7 @@ const ContactAdmin = () => {
                 <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-[0.2em] uppercase mb-4">
                   Support System
                 </div>
-                <h2 className="text-5xl font-black text-white tracking-tighter leading-none">
+                <h2 className="text-5xl font-bold text-white tracking-tighter leading-none">
                   Contact <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-fuchsia-400">Support.</span>
                 </h2>
                 <p className="text-slate-400 mt-4">Your role: <span className="text-indigo-400 font-semibold capitalize">{userRole}</span></p>

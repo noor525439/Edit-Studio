@@ -27,7 +27,7 @@ const ClientProfile = () => {
         <div className="min-h-screen bg-slate-50 p-6 md:p-12">
             <main className="max-w-6xl mx-auto">
                 <div className="flex justify-between items-center mb-2">
-                    <h2 className="text-2xl font-black text-slate-900">Find Editors</h2>
+                    <h2 className="text-2xl font-bold text-slate-900">Find Editors</h2>
                     <Link to="/editor/gigs" className="text-sm font-bold text-green-600 hover:underline">
                         View all gigs →
                     </Link>
@@ -69,7 +69,7 @@ const ClientProfile = () => {
                                 </Link>
                                 <Link
                                     to={`/client/hire/${editor._id}`}
-                                    className="w-full py-2.5 border-2 border-green-600 text-green-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-50 transition-all flex items-center justify-center gap-2"
+                                    className="w-full py-2.5 border-2 border-green-600 text-green-700 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-green-50 transition-all flex items-center justify-center gap-2"
                                 >
                                     <Zap size={14} fill="currentColor" /> Hire Now
                                 </Link>

@@ -30,12 +30,12 @@ const StandaloneTaskDetail = ({ task, order, attachments = [], backLink, backLab
         {backLabel}
       </Link>
 
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
         <div className="p-8 border-b border-slate-100">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Task</p>
-              <h1 className="text-2xl md:text-3xl font-black text-slate-900">{task.title}</h1>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Task</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{task.title}</h1>
               {projectLink && (
                 <Link to={projectLink} className="text-sm text-green-600 font-bold hover:underline mt-2 inline-block">
                   {projectLinkLabel || order?.projectTitle || "View project"}
@@ -44,11 +44,11 @@ const StandaloneTaskDetail = ({ task, order, attachments = [], backLink, backLab
             </div>
             <div className="flex flex-wrap gap-2">
               {isOverdue && task.timerStatus !== "completed" && (
-                <Badge variant="destructive" className="text-[10px] uppercase font-black">
+                <Badge variant="destructive" className="text-[10px] uppercase font-bold">
                   <AlertTriangle size={12} className="mr-1" /> Overdue
                 </Badge>
               )}
-              <Badge variant="outline" className="text-[10px] uppercase font-black">
+              <Badge variant="outline" className="text-[10px] uppercase font-bold">
                 {timerLabel(task.timerStatus)}
               </Badge>
             </div>
@@ -70,14 +70,14 @@ const StandaloneTaskDetail = ({ task, order, attachments = [], backLink, backLab
 
         {task.details && (
           <div className="px-8 pb-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Description</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Description</p>
             <p className="text-slate-600 leading-relaxed">{task.details}</p>
           </div>
         )}
 
         {attachments?.length > 0 && (
           <div className="px-8 pb-8 border-t border-slate-100 pt-6">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-1">
               <Paperclip size={12} /> Project attachments
             </p>
             <TaskAttachments attachments={attachments} />
@@ -101,7 +101,7 @@ const DetailRow = ({ icon: Icon, label, value, avatar }) => (
       </div>
     )}
     <div>
-      <p className="text-[10px] font-black uppercase text-slate-400">{label}</p>
+      <p className="text-[10px] font-bold uppercase text-slate-400">{label}</p>
       <p className="font-bold text-slate-800 text-sm">{value}</p>
     </div>
   </div>

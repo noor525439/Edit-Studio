@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const notificationSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    actorId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     type: {
       type: String,
       enum: [

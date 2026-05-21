@@ -34,7 +34,7 @@ const TaskAttachments = ({ attachments = [] }) => {
               target="_blank"
               rel="noreferrer"
               download
-              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-green-600 transition-colors"
+              className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-green-600 transition-colors"
             >
               <Download size={14} />
               Download

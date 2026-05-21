@@ -87,7 +87,7 @@ const SpeechToText = () => {
                     </button>
                     <div className="flex items-center gap-2 px-4 py-1.5 bg-white/5 border border-white/10 rounded-full">
                         <div className={`w-1.5 h-1.5 rounded-full ${isTranscribing ? 'bg-red-500 animate-pulse' : 'bg-emerald-500'}`} />
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
                             {isTranscribing ? "Listening" : "Ready"}
                         </span>
                     </div>
@@ -100,7 +100,7 @@ const SpeechToText = () => {
                     {/* Left Panel: Stats & Controls */}
                     <div className="lg:col-span-4 space-y-6">
                         <div>
-                            <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Speech to <span className="text-emerald-500">Text</span></h1>
+                            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Speech to <span className="text-emerald-500">Text</span></h1>
                             <p className="text-slate-500 text-sm leading-relaxed">Neural transcription for scripts and subtitles.</p>
                         </div>
 
@@ -121,7 +121,7 @@ const SpeechToText = () => {
                                 <div className={`w-16 h-16 rounded-full flex items-center justify-center ${isTranscribing ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'bg-white text-black'}`}>
                                     {isTranscribing ? <MicOff size={28} /> : <Mic size={28} />}
                                 </div>
-                                <span className="text-xs font-black uppercase tracking-[0.2em]">
+                                <span className="text-xs font-bold uppercase tracking-[0.2em]">
                                     {isTranscribing ? "Stop Recording" : "Start Neural Link"}
                                 </span>
                             </button>
@@ -134,7 +134,7 @@ const SpeechToText = () => {
                         </div>
 
                         <div className="bg-[#0D0D0F] border border-white/5 rounded-2xl p-6">
-                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">
+                            <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">
                                 <span>Engine Fidelity</span>
                                 <span className="text-emerald-500">Ultra-High</span>
                             </div>
@@ -169,7 +169,7 @@ const SpeechToText = () => {
                                     </button>
                                     <button 
                                         onClick={copyToClipboard}
-                                        className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-black transition-all ${
+                                        className={`flex items-center gap-2 px-6 py-2 rounded-xl text-xs font-bold transition-all ${
                                             copied ? "bg-emerald-500 text-white" : "bg-white text-black hover:bg-emerald-500 hover:text-white"
                                         }`}
                                     >
@@ -183,7 +183,7 @@ const SpeechToText = () => {
                                 {!transcript && !isTranscribing && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-800">
                                         <Volume2 size={40} className="mb-4 opacity-10" />
-                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-20">Awaiting Signal</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-20">Awaiting Signal</p>
                                     </div>
                                 )}
                                 <div className="relative z-10 text-xl md:text-2xl text-slate-200 font-medium leading-relaxed whitespace-pre-wrap">
@@ -196,11 +196,11 @@ const SpeechToText = () => {
                                 {/* Bottom stats */}
                                 <div className="absolute bottom-6 left-8 flex gap-6">
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-black text-slate-600 uppercase">Words</span>
+                                        <span className="text-[9px] font-bold text-slate-600 uppercase">Words</span>
                                         <span className="text-xs text-white font-bold">{transcript.trim() === "" ? 0 : transcript.trim().split(/\s+/).length}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-black text-slate-600 uppercase">Characters</span>
+                                        <span className="text-[9px] font-bold text-slate-600 uppercase">Characters</span>
                                         <span className="text-xs text-white font-bold">{transcript.length}</span>
                                     </div>
                                 </div>

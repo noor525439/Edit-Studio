@@ -14,12 +14,12 @@ const ProjectCard = ({ project, detailPath, showClient = false }) => {
     >
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-black text-lg text-slate-900 group-hover:text-green-700 transition-colors">
+          <h3 className="font-bold text-lg text-slate-900 group-hover:text-green-700 transition-colors">
             {project.projectTitle}
           </h3>
           <p className="text-sm text-slate-500 mt-1">{project.videoType} · {project.videoDuration}</p>
         </div>
-        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${statusBadgeClass(project.status)}`}>
+        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusBadgeClass(project.status)}`}>
           {statusLabel(project.status)}
         </span>
       </div>

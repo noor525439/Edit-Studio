@@ -84,8 +84,8 @@ const EditorTaskDetail = () => {
 
       {/* Project reviews — editor view */}
       <div className="max-w-6xl mx-auto pb-10 -mt-4">
-        <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-          <h2 className="text-lg font-black text-slate-900 mb-1">Client reviews</h2>
+        <section className="bg-white border border-slate-200 rounded-2xl p-8">
+          <h2 className="text-lg font-bold text-slate-900 mb-1">Client reviews</h2>
           {reviewsLoading ? (
             <p className="text-slate-400 text-sm mt-4">Loading reviews…</p>
           ) : (
@@ -93,7 +93,7 @@ const EditorTaskDetail = () => {
               <div className="flex items-center gap-4 mt-4 mb-6 p-4 bg-slate-50 rounded-xl">
                 <StarRating value={reviewsAvg} readonly size={22} />
                 <div>
-                  <p className="font-black text-slate-900">{reviewsAvg} / 5</p>
+                  <p className="font-bold text-slate-900">{reviewsAvg} / 5</p>
                   <p className="text-xs text-slate-500">{reviewsCount} review{reviewsCount !== 1 ? "s" : ""}</p>
                 </div>
               </div>
