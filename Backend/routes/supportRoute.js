@@ -12,6 +12,7 @@ import {
 import uploadMiddleware from '../middleware/uploadMiddleware.js';
 import { isAuthenticated } from "../middleware/authenticated.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
+import { replyByUser } from '../controllers/SupportController.js';
 
 const router = express.Router();
 
@@ -26,5 +27,10 @@ router.put('/:messageId/reply', isAuthenticated, authorizeRole('admin'), uploadM
 router.put('/:messageId/read', isAuthenticated, authorizeRole('admin'), markAsReadByAdmin);
 router.put('/:messageId/status', isAuthenticated, authorizeRole('admin'), updateSupportMessageStatus);
 router.get('/:messageId', isAuthenticated, getSupportMessageById);
+router.post(
+  '/my-messages/:messageId/reply',
+  isAuthenticated,
+  replyByUser
+);
 
 export default router;

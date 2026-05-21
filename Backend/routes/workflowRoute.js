@@ -51,6 +51,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   getAdminUsers,
+  getAdminUserById,
 } from "../Controllers/projectWorkflowController.js";
 import {
   getClientPublicProfile,
@@ -94,6 +95,7 @@ router.post("/reviews", isAuthenticated, authorizeRole("client"), createReview);
 router.get("/gig/editor/:editorUserId", isAuthenticated, getEditorGigProfile);
 router.get("/admin/commissions", isAuthenticated, authorizeRole("admin"), getAdminCommissionOverview);
 router.get("/admin/users", isAuthenticated, authorizeRole("admin"), getAdminUsers);
+router.get("/admin/users/:userId", isAuthenticated, authorizeRole("admin"), getAdminUserById);
 router.get("/admin/activities", isAuthenticated, isAdmin, getAdminActivities);
 router.get("/admin/overview", isAuthenticated, isAdmin, getAdminOverview);
 

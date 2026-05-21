@@ -20,7 +20,7 @@ const supportMessageSchema = new mongoose.Schema(
     },
     senderRole: {
       type: String,
-      enum: ['client', 'editor', 'admin'],
+      enum: ['client', 'editor', 'admin' , 'freelancer'],
       required: true
     },
     subject: {

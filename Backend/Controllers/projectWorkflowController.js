@@ -612,22 +612,20 @@ export const updateProgressPercent = async (req, res) => {
       io,
     });
 
-    // If project is delivered, notify admins as well
-    if (order.status === "delivered") {
-      const admins = await User.find({ role: "admin" }).select("_id username");
-      await Promise.all(
-        admins.map((a) =>
-          createNotification({
-            userId: a._id,
-            type: "progress_updated",
-            title: "Project delivered",
-            message: `${currentUser.username} updated progress for "${order.projectTitle}" to ${percent}% (delivered).`,
-            orderId: order._id,
-            io,
-          })
-        )
-      );
-    }
+    // Notify admins about all progress updates
+    const admins = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      admins.map((a) =>
+        createNotification({
+          userId: a._id,
+          type: "progress_updated",
+          title: `Project progress ${percent}%`,
+          message: `${currentUser.username} updated progress for "${order.projectTitle}" to ${percent}%.`,
+          orderId: order._id,
+          io,
+        })
+      )
+    );
 
     await logProjectActivity({
       orderId: order._id,
@@ -683,11 +681,20 @@ export const createSubmission = async (req, res) => {
       orderId: order._id,
       io,
     });
-    // await notifyByEmail(
-    //   order.clientId,
-    //   "New project delivery",
-    //   `Your editor submitted deliverables for "${order.projectTitle}".`
-    // );
+
+    const adminUsers = await User.find({ role: "admin" }).select("_id username");
+    await Promise.all(
+      adminUsers.map((a) =>
+        createNotification({
+          userId: a._id,
+          type: "submission_received",
+          title: "Project work submitted",
+          message: `${currentUser.username} submitted work for "${order.projectTitle}".`,
+          orderId: order._id,
+          io,
+        })
+      )
+    );
 
     await logProjectActivity({
       orderId: order._id,
@@ -763,12 +770,25 @@ export const requestRevision = async (req, res) => {
         orderId: order._id,
         io,
       });
-      // const editor = await User.findById(order.assignedEditorId).select("email");
-     await notifyByEmail(
-  order.assignedEditorId,
-  "Revision requested",
-  `Client requested revisions for "${order.projectTitle}": ${reason}`
-);
+      await notifyByEmail(
+        order.assignedEditorId,
+        "Revision requested",
+        `Client requested revisions for "${order.projectTitle}": ${reason}`
+      );
+
+      const adminUsers = await User.find({ role: "admin" }).select("_id username");
+      await Promise.all(
+        adminUsers.map((a) =>
+          createNotification({
+            userId: a._id,
+            type: "revision_requested",
+            title: "Revision requested",
+            message: `${currentUser.username} requested revisions for "${order.projectTitle}".`,
+            orderId: order._id,
+            io,
+          })
+        )
+      );
     }
 
     await logProjectActivity({
@@ -970,6 +990,32 @@ export const markAllNotificationsRead = async (req, res) => {
 
     await Notification.updateMany({ userId: currentUser._id, read: false }, { read: true });
     return res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getAdminUserById = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (currentUser.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Admin only" });
+    }
+
+    const { userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(userId).select(
+      "username email avatar phone role isApproved isVerified createdAt"
+    );
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, data: user });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

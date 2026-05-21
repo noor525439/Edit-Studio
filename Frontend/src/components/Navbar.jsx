@@ -190,6 +190,15 @@ const Navbar = () => {
                                     </Link>
                                 )}
 
+                                {user?.role !== 'admin' && (
+    <Link to="/my-support">
+        <DropdownMenuItem className="cursor-pointer rounded-xl py-3">
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Support Desks
+        </DropdownMenuItem>
+    </Link>
+)}
+
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={logoutHandler} className="cursor-pointer rounded-xl py-3 text-red-500">
                                     <LogOut className="mr-2 h-4 w-4" />

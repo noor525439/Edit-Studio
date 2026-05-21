@@ -27,6 +27,7 @@ import ClientPaymentReview from "./pages/client/ClientPaymentReview"
 import EditorTaskItemDetail from "./pages/editor/EditorTaskItemDetail"
 import PaymentSuccess from "./pages/PaymentSuccess"
 import PaymentCancel from "./pages/PaymentCancel"
+import MySupport from "./pages/MySupport";
 
 import ClientDashboard from "./pages/client/ClientDashboard"
 import ClientProjects from "./pages/client/ClientProjects"
@@ -43,6 +44,7 @@ import EditorGigs from "./pages/editor/EditorGigs"
 import AdminProjects from "./pages/admin/AdminProjects"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import AdminProjectDetail from "./pages/admin/AdminProjectDetail"
+import AdminUserDetail from "./pages/admin/AdminUserDetail"
 import AdminNotifications from "./pages/admin/AdminNotifications"
 import AdminActivities from "./pages/admin/AdminActivities"
 import ClientNotifications from "./pages/client/ClientNotifications"
@@ -60,6 +62,7 @@ const router = createBrowserRouter([
   { path: '/verify-otp/:email', element: <VerifyOTP /> },
   { path: '/change-password/:email', element: <ChangePassword /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/my-support', element: <MySupport /> },
 
   // Client role routes
   { path: '/client/dashboard', element: withNav(<ClientDashboard />) },
@@ -86,6 +89,7 @@ const router = createBrowserRouter([
    { path: '/admin/dashboard', element: withNav(<AdminDashboard />)},
   { path: '/admin/projects', element: withNav(<AdminProjects />) },
   { path: '/admin/projects/:id', element: withNav(<AdminProjectDetail />) },
+  { path: '/admin/users/:id', element: withNav(<AdminUserDetail />) },
   { path: '/admin/activities', element: withNav(<AdminActivities />) },
   { path: '/client/notifications', element: withNav(<ClientNotifications />) },
   { path: '/admin/notifications', element: withNav(<AdminNotifications />) },

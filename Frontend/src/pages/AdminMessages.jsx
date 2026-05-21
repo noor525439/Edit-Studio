@@ -17,7 +17,8 @@ const AdminMessages = () => {
   const [messagePage, setMessagePage] = useState(1);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  const authToken = localStorage.getItem('authToken');
+ // Line 13 - change karo
+const authToken = localStorage.getItem('accessToken'); // ✅
 
   // Fetch all support messages
   const fetchMessages = async (page = 1) => {

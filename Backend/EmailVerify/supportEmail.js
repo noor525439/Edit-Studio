@@ -113,7 +113,7 @@ export const sendSupportReplyEmail = async (recipientEmail, userName, replyMessa
   }
 };
 
-export const sendNewSupportNotificationEmail = async (adminEmail, senderName, subject, message) => {
+export const sendNewSupportNotificationEmail = async (adminEmail, senderName, subject, message, attachments = []) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -121,6 +121,12 @@ export const sendNewSupportNotificationEmail = async (adminEmail, senderName, su
       pass: process.env.MAIL_PASSWORD
     }
   });
+
+  const attachmentsHtml = attachments.length
+    ? `<div style="margin-top: 20px; background: #f9fafb; padding: 15px; border-radius: 4px;"><p><strong>Attachments:</strong></p>${attachments
+        .map((file) => `<p style="margin: 0.4rem 0;">• ${file.filename}</p>`)
+        .join('')}</div>`
+    : '';
 
   const mailOptions = {
     from: process.env.MAIL_USER,
@@ -178,7 +184,7 @@ export const sendNewSupportNotificationEmail = async (adminEmail, senderName, su
               <p><strong>Message:</strong></p>
               <p>${message.replace(/\n/g, '<br>')}</p>
             </div>
-            
+            ${attachmentsHtml}
             <a href="http://localhost:3000/admin/messages" class="button">Review in Admin Panel</a>
           </div>
         </body>

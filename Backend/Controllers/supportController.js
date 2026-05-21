@@ -1,28 +1,77 @@
 import SupportMessage from "../models/SupportMessageModel.js";
-import {User} from "../models/Usermodels.js";
-import { sendSupportReplyEmail } from "../EmailVerify/supportEmail.js";
+import { User } from "../models/Usermodels.js";
+import { sendSupportReplyEmail, sendNewSupportNotificationEmail } from "../EmailVerify/supportEmail.js";
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const spamRegex = /(asdf+|qwerty|zxcvb+|qazwsx|keyboard mash|dwww+|swww+|fwww+|aaaa+|dddd+|ffff+|qqqq+)/i;
+
+const looksLikeSpam = (text) => {
+  if (!text) return false;
+  const normalized = text.trim().toLowerCase();
+  if (spamRegex.test(normalized)) return true;
+  if (/([a-zA-Z])\1{4,}/.test(normalized)) return true;
+  const letters = (normalized.match(/[a-zA-Z]/g) || []).length;
+  const ratio = letters / Math.max(normalized.length, 1);
+  return ratio < 0.35;
+};
 
 export const createSupportMessage = async (req, res) => {
   try {
-    const { senderName, senderEmail, senderRole, subject, message, attachments } = req.body;
-    const userId = req.user?.id;
-
-    if (!senderName || !senderEmail || !senderRole || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required"
-      });
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
-    // Process file uploads
-    let uploadedAttachments = [];
+    const currentUser = await User.findById(userId).select('role username email');
+    if (!currentUser) {
+      return res.status(401).json({ success: false, message: 'Invalid user session' });
+    }
+
+    const senderName = String(req.body.senderName || '').trim();
+    const senderEmail = String(req.body.senderEmail || '').trim().toLowerCase();
+    const subject = String(req.body.subject || '').trim();
+    const message = String(req.body.message || '').trim();
+    const senderRole = currentUser.role || 'client';
+
+    if (!senderName || !senderEmail || !subject || !message) {
+      return res.status(400).json({ success: false, message: 'Full name, email, subject, and message are required.' });
+    }
+
+    if (!emailRegex.test(senderEmail)) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address.' });
+    }
+
+    if (senderName.length < 3) {
+      return res.status(400).json({ success: false, message: 'Name should be at least 3 characters long.' });
+    }
+
+    if (subject.length < 10) {
+      return res.status(400).json({ success: false, message: 'Subject should be at least 10 characters long.' });
+    }
+
+    if (message.length < 20) {
+      return res.status(400).json({ success: false, message: 'Message should be at least 20 characters long.' });
+    }
+
+    if (looksLikeSpam(subject)) {
+      return res.status(400).json({ success: false, message: 'Subject looks like spam. Please provide a clear subject.' });
+    }
+
+    if (looksLikeSpam(message)) {
+      return res.status(400).json({ success: false, message: 'Message looks like spam or gibberish. Please provide a meaningful request.' });
+    }
+
+    const uploadedAttachments = [];
     if (req.files && req.files.length > 0) {
-      uploadedAttachments = req.files.map(file => ({
-        filename: file.originalname,
-        fileUrl: file.path, // Cloudinary URL
-        fileType: file.mimetype,
-        uploadedAt: new Date()
-      }));
+      req.files.forEach((file) => {
+        const fileUrl = file.path || file.secure_url || file.url || file.location || '';
+        uploadedAttachments.push({
+          filename: file.originalname,
+          fileUrl,
+          fileType: file.mimetype,
+          uploadedAt: new Date()
+        });
+      });
     }
 
     const newSupportMessage = new SupportMessage({
@@ -39,7 +88,6 @@ export const createSupportMessage = async (req, res) => {
 
     await newSupportMessage.save();
 
-    // Emit socket event to notify admin
     const socketServer = req.app.get('io');
     if (socketServer) {
       socketServer.to('admin_room').emit('new_support_message', {
@@ -52,17 +100,23 @@ export const createSupportMessage = async (req, res) => {
       });
     }
 
-    res.status(201).json({
+    if (process.env.ADMIN_EMAIL) {
+      sendNewSupportNotificationEmail(process.env.ADMIN_EMAIL, senderName, subject, message, uploadedAttachments).catch((err) => {
+        console.error('Support notification email failed:', err);
+      });
+    }
+
+    return res.status(201).json({
       success: true,
-      message: "Support message sent successfully",
+      message: 'Support message sent successfully.',
       data: newSupportMessage
     });
   } catch (error) {
-    console.error("Error creating support message:", error);
-    res.status(500).json({
+    console.error('Error creating support message:', error);
+    const status = error.name === 'MulterError' ? 400 : 500;
+    return res.status(status).json({
       success: false,
-      message: "Failed to send support message",
-      error: error.message
+      message: error.message || 'Failed to send support message'
     });
   }
 };
@@ -114,10 +168,14 @@ export const getAllSupportMessages = async (req, res) => {
   }
 };
 
-// Get user's own support messages
 export const getUserSupportMessages = async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.userId; // ✅ req.user?.id se req.userId karo
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    
     const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
 
@@ -389,6 +447,69 @@ export const getSupportStats = async (req, res) => {
       success: false,
       message: "Failed to fetch support statistics",
       error: error.message
+    });
+  }
+};
+
+export const replyByUser = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { message } = req.body;  // frontend "message" bhej raha hai
+    const userId = req.userId;     // aapka auth middleware userId set karta hai
+
+    if (!message?.trim()) {
+      return res.status(400).json({
+        success: false, message: "Message is required"
+      });
+    }
+
+    // Make sure ticket is closed nahi hai
+    const existing = await SupportMessage.findOne({
+      _id: messageId, userId
+    });
+
+    if (!existing) {
+      return res.status(404).json({
+        success: false, message: "Ticket not found"
+      });
+    }
+
+    if (existing.status === 'closed') {
+      return res.status(400).json({
+        success: false, message: "This ticket is closed"
+      });
+    }
+
+    const updated = await SupportMessage.findByIdAndUpdate(
+      messageId,
+      {
+        $push: {
+         replies: {
+  replyBy: adminId,
+  replyByRole: adminRole,
+  replyMessage,
+  isAdminReply: true,   // ← yeh add karein
+  attachments: uploadedAttachments,
+  replyedAt: new Date(),
+  isRead: false
+}
+        },
+        isReadByAdmin: false,  // admin ko unread dikhao
+        lastUpdatedBy: 'client'
+      },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Reply sent",
+      data: updated
+    });
+
+  } catch (error) {
+    console.error("User reply error:", error);
+    return res.status(500).json({
+      success: false, message: "Failed to send reply"
     });
   }
 };
