@@ -43,6 +43,7 @@ const TaskComments = ({
             const mine =
               String(c.senderId?._id || c.senderId) === String(user?._id);
             const senderRole = c.senderId?.role || "";
+            const senderName = c.senderId?.username || "User";
             const isAdminSender = String(senderRole).toLowerCase() === "admin";
 
             return (
@@ -54,22 +55,28 @@ const TaskComments = ({
                     : "bg-slate-50 border border-slate-100 text-slate-700"
                 }`}
               >
-                <p className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1 flex items-center gap-1">
-                  {c.senderId?.username || "User"}
-                  {isAdmin && senderRole && (
+                <div className="flex items-center gap-2 mb-1.5 text-xs font-semibold tracking-wide">
+                  <span
+                    className={
+                      mine ? "text-customblue font-bold" : "text-slate-900"
+                    }
+                  >
+                    {mine ? "You" : senderName}
+                  </span>
+                  {senderRole && (
                     <span
-                      className={`ml-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                         isAdminSender
-                          ? "bg-amber-200 text-amber-800"
+                          ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
                           : mine
-                            ? "bg-white/20 text-white"
-                            : "bg-slate-200 text-slate-600"
+                            ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                            : "bg-slate-700 text-slate-300"
                       }`}
                     >
                       {senderRole}
                     </span>
                   )}
-                </p>
+                </div>
                 <p>{c.text}</p>
                 <p className="text-[9px] mt-2 opacity-50">
                   {new Date(c.createdAt).toLocaleString()}
