@@ -5,11 +5,10 @@ import { getData } from '@/context/userContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-// ── Status & Priority styles (Dark Theme Optimized) ────────────────────────
 const STATUS_MAP = {
   open:         { label: 'Open',        cls: 'text-blue-400 bg-blue-500/10 border-blue-500/30' },
   'in-progress':{ label: 'In Progress', cls: 'text-amber-400 bg-amber-500/10 border-amber-500/30' },
-  resolved:     { label: 'Resolved',    cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
+  resolved:     { label: 'Resolved',    cls: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30' },
   closed:       { label: 'Closed',      cls: 'text-slate-400 bg-white/5 border-white/10' },
 };
 
@@ -38,31 +37,17 @@ const getSenderInfo = ({ reply, message, currentUser }) => {
   const replyRole = String(reply?.replyByRole || reply?.senderRole || message?.senderRole || 'support')
     .trim()
     .toLowerCase();
-  const replyName =
-    reply?.replyBy?.username ||
-    [reply?.replyBy?.firstName, reply?.replyBy?.lastName]
-      .filter(Boolean)
-      .join(' ') ||
-    reply?.senderName ||
-    message?.senderName ||
-    (replyRole === 'admin'
-      ? 'Admin'
-      : replyRole === 'editor'
-      ? 'Editor'
-      : replyRole === 'client'
-      ? 'Client'
-      : 'Support');
   const isOwnMessage = currentUserId !== '' && replyById !== '' && currentUserId === replyById;
-  return { isOwnMessage, replyRole, replyName };
+  return { isOwnMessage, replyRole };
 };
 
 const getMessageHeader = ({ reply, message, currentUser }) => {
-  const { isOwnMessage, replyRole, replyName } = getSenderInfo({ reply, message, currentUser });
+  const { isOwnMessage, replyRole } = getSenderInfo({ reply, message, currentUser });
   if (isOwnMessage) return 'You';
   const roleLabel = replyRole
     ? replyRole.charAt(0).toUpperCase() + replyRole.slice(1)
     : 'Support';
-  return `${replyName} • ${roleLabel}`;
+  return `${roleLabel}`;
 };
 
 const getBubbleClasses = (isOwnMessage) => ({
@@ -72,10 +57,9 @@ const getBubbleClasses = (isOwnMessage) => ({
     : 'bg-white/5 text-slate-200 rounded-2xl rounded-tl-none px-4 py-2.5 border border-white/10',
   header: isOwnMessage
     ? 'text-[10px] font-semibold text-indigo-300 uppercase tracking-wide mb-1'
-    : 'text-[10px] font-semibold text-emerald-300 uppercase tracking-wide mb-1',
+    : 'text-[10px] font-semibold text-emerald-400 uppercase tracking-wide mb-1',
 });
 
-// ── Empty state ────────────────────────────────────────────────────────────
 const EmptyState = ({ onNew }) => (
   <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white/3 border border-white/10 rounded-2xl shadow-xl">
     <div className="relative w-16 h-16 mx-auto mb-5 flex items-center justify-center">
@@ -92,7 +76,6 @@ const EmptyState = ({ onNew }) => (
   </div>
 );
 
-// ── Message detail panel ───────────────────────────────────────────────────
 const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
   const { user: currentUser } = getData();
   const repliesEndRef = useRef(null);
@@ -134,7 +117,7 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scroll pb-2">
-        {/* User Original Message */}
+        
         <div className="flex justify-end pl-8">
           <div className="max-w-full">
             <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-md">
@@ -155,7 +138,6 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
           </div>
         </div>
 
-        {/* Replies Thread */}
         {msg.replies?.length > 0 ? (
           msg.replies.map((reply, i) => {
             const { isOwnMessage } = getSenderInfo({
@@ -200,7 +182,6 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
         <div ref={repliesEndRef} />
       </div>
 
-      {/* Reply Box Input */}
       <div className="mt-2 pt-3 border-t border-white/10">
         {replyError && <p className="text-red-400 text-[11px] font-medium mb-1.5">{replyError}</p>}
         <form onSubmit={handleSendReply} className="flex gap-2 items-end relative">
@@ -220,7 +201,6 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
   );
 };
 
-// ── Message list item ──────────────────────────────────────────────────────
 const MessageCard = ({ msg, isActive, onClick }) => {
   const hasUnread = msg.replies?.some(r => !r.isRead);
   return (
@@ -241,7 +221,7 @@ const MessageCard = ({ msg, isActive, onClick }) => {
   );
 };
 
-// ── Main page ──────────────────────────────────────────────────────────────
+
 const MySupport = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
@@ -268,6 +248,7 @@ const MySupport = () => {
         );
       }
     } catch (error) {
+
       console.error(error);
       setError('Failed to load your messages. Please try again.');
     } finally {
@@ -285,23 +266,25 @@ const MySupport = () => {
 
   return (
     <section className="min-h-screen w-full bg-[#080c14] text-slate-300 p-4 relative overflow-hidden antialiased flex flex-col items-center justify-center">
-      {/* Glow Orbs & Background Grid */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-indigo-600/10 blur-[100px]" />
         <div className="absolute -bottom-32 -right-32 w-[500px] h-[500px] rounded-full bg-violet-600/10 blur-[100px]" />
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
       </div>
 
-      <button onClick={() => navigate(-1)} className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">✕ Back</button>
+    <button onClick={() => navigate(-1)} className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-all text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+          </svg> Back</button>
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
+   
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight sm:text-3xl">Support Desk</h1>
             <p className="text-slate-500 text-xs mt-0.5">Track active conversations and response history</p>
           </div>
-          <button onClick={() => navigate('/contact-admin')} className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition-all active:scale-95">➕ Open New Ticket</button>
+          <button onClick={() => navigate('/contact-admin')} className="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-md transition-all active:scale-95">+ Open New Ticket</button>
         </div>
 
         {error && (
@@ -320,7 +303,7 @@ const MySupport = () => {
           <EmptyState onNew={() => navigate('/contact-admin')} />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
-            {/* Tickets Sidebar Queue */}
+          
             <div className={`lg:block ${showDetail ? 'hidden' : 'block'}`}>
               <div className="bg-white/3 border border-white/10 rounded-2xl p-3 space-y-2 max-h-[68vh] overflow-y-auto custom-scroll shadow-2xl shadow-black/50">
                 <div className="flex items-center justify-between px-1.5 py-1 mb-2">
@@ -333,7 +316,7 @@ const MySupport = () => {
               </div>
             </div>
 
-            {/* Conversation Window */}
+           
             <div className={`lg:col-span-2 lg:block ${showDetail ? 'block' : 'hidden'}`}>
               {selected ? (
                 <div className="bg-white/3 border border-white/10 rounded-2xl p-5 sm:p-6 h-[68vh] flex flex-col shadow-2xl shadow-black/50 relative">

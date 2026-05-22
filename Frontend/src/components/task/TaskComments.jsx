@@ -70,7 +70,7 @@ const TaskComments = ({
                           ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
                           : mine
                             ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
-                            : "bg-slate-700 text-slate-300"
+                            : "bg-green-700/15 text-green-600 border border-green-700/30"
                       }`}
                     >
                       {senderRole}
