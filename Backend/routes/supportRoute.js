@@ -15,12 +15,9 @@ import { authorizeRole } from "../middleware/authorizeRole.js";
 import { replyByUser } from '../controllers/SupportController.js';
 
 const router = express.Router();
-
-// User routes
 router.post('/create', isAuthenticated, uploadMiddleware.array('files', 5), createSupportMessage);
 router.get('/my-messages', isAuthenticated, getUserSupportMessages);
 
-// Admin routes (specific paths before :messageId)
 router.get('/stats/dashboard', isAuthenticated, authorizeRole('admin'), getSupportStats);
 router.get('/', isAuthenticated, authorizeRole('admin'), getAllSupportMessages);
 router.put('/:messageId/reply', isAuthenticated, authorizeRole('admin'), uploadMiddleware.array('files', 5), replySupportMessage);

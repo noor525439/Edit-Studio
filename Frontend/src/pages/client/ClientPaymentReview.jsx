@@ -149,7 +149,6 @@ const ClientPaymentReview = () => {
                       <Badge variant="outline" className="text-[10px] uppercase">
                         {paymentDisplayStatus(p.status).label}
                       </Badge>
-                      {/* Admin: show payment ID */}
                       {isAdminView && (
                         <span className="text-[10px] font-mono text-slate-400 w-full mt-1">
                           ID: {p._id}
@@ -164,8 +163,6 @@ const ClientPaymentReview = () => {
                 No payments recorded yet.
               </p>
             )}
-
-            {/* Pay now button — only for client, not admin */}
             {!isAdminView && status !== "completed" && (
               <Link to={`/checkout?orderId=${projectId}`}>
                 <Button className="w-full py-6 bg-slate-900 hover:bg-green-600 font-bold uppercase tracking-widest text-xs">
@@ -179,7 +176,6 @@ const ClientPaymentReview = () => {
     </div>
   );
 
-  // Admin bypasses RoleGuard entirely
   if (isAdminView) return content;
 
   return <RoleGuard allowedRoles={CLIENT_ROLES}>{content}</RoleGuard>;

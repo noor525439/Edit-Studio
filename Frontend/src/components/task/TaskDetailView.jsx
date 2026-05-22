@@ -1,5 +1,16 @@
 import { Link } from "react-router-dom";
-import { Calendar, DollarSign, Send, RotateCcw, CheckCircle, Star, User, CreditCard, ShieldCheck, Eye } from "lucide-react";
+import {
+  Calendar,
+  DollarSign,
+  Send,
+  RotateCcw,
+  CheckCircle,
+  Star,
+  User,
+  CreditCard,
+  ShieldCheck,
+  Eye,
+} from "lucide-react";
 import ProgressBar from "@/components/ProgressBar";
 import StarRating from "@/components/StarRating";
 import ActivityTimeline from "@/components/task/ActivityTimeline";
@@ -37,13 +48,10 @@ const TaskDetailView = ({
   onRejectApplication,
   onTaskRefresh,
   onCreateTask,
-  // Admin-only props
-  onAdminForceComplete,
-  onAdminCancelOrder,
-  onAdminReassignEditor,
 }) => {
   if (loading) return <p className="p-10 text-slate-400">Loading project…</p>;
-  if (!data?.order) return <p className="p-10 text-slate-600">Project not found.</p>;
+  if (!data?.order)
+    return <p className="p-10 text-slate-600">Project not found.</p>;
 
   const order = data?.order || {};
   const activity = data?.activity || [];
@@ -51,7 +59,10 @@ const TaskDetailView = ({
   const attachments = data?.attachments || [];
   const isAdmin = mode === "admin";
 
-  const canApply = mode === "editor" && order.status === "published" && !order.assignedEditorId;
+  const canApply =
+    mode === "editor" &&
+    order.status === "published" &&
+    !order.assignedEditorId;
   const isAssignedEditor = mode === "editor" && order.assignedEditorId;
 
   const allApps = data.applications || [];
@@ -65,22 +76,30 @@ const TaskDetailView = ({
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-6 lg:py-10">
       <div className="max-w-6xl mx-auto">
-
-        <Link to={backLink} className="text-sm font-bold text-green-600 hover:underline mb-6 inline-block">
+        <Link
+          to={backLink}
+          className="text-sm font-bold text-green-600 hover:underline mb-6 inline-block"
+        >
           {backLabel}
         </Link>
-
-        {/* ── Main project card ── */}
         <div className="bg-white border border-slate-200 rounded-2xl p-8 mb-6">
           <div className="flex flex-wrap justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-slate-900">{order.projectTitle}</h1>
-              <p className="text-slate-500 text-sm mt-2">{order.videoType} · {order.editingStyle}</p>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900">
+                {order.projectTitle}
+              </h1>
+              <p className="text-slate-500 text-sm mt-2">
+                {order.videoType} · {order.editingStyle}
+              </p>
               {isAdmin && (
-                <p className="text-[10px] font-mono text-slate-400 mt-1">ID: {order._id}</p>
+                <p className="text-[10px] font-mono text-slate-400 mt-1">
+                  ID: {order._id}
+                </p>
               )}
             </div>
-            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase h-fit ${statusBadgeClass(order.status)}`}>
+            <span
+              className={`px-3 py-1 rounded-full text-[10px] font-black uppercase h-fit ${statusBadgeClass(order.status)}`}
+            >
               {statusLabel(order.status)}
             </span>
           </div>
@@ -91,39 +110,56 @@ const TaskDetailView = ({
             <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl text-sm">
               <Calendar className="text-green-600" size={18} />
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400">Deadline</p>
-                <p className="font-bold text-slate-800">{new Date(order.deadline).toLocaleDateString()}</p>
+                <p className="text-[10px] font-black uppercase text-slate-400">
+                  Deadline
+                </p>
+                <p className="font-bold text-slate-800">
+                  {new Date(order.deadline).toLocaleDateString()}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl text-sm">
               <DollarSign className="text-green-600" size={18} />
               <div>
-                <p className="text-[10px] font-black uppercase text-slate-400">Budget</p>
-                <p className="font-bold text-slate-800">${order.autoPriceEstimate || 0}</p>
+                <p className="text-[10px] font-black uppercase text-slate-400">
+                  Budget
+                </p>
+                <p className="font-bold text-slate-800">
+                  ${order.autoPriceEstimate || 0}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl text-sm">
-              <p className="text-[10px] font-black uppercase text-slate-400 w-full">Stage</p>
-              <p className="font-bold text-slate-800 text-xs">{order.progressStage}</p>
+              <p className="text-[10px] font-black uppercase text-slate-400 w-full">
+                Stage
+              </p>
+              <p className="font-bold text-slate-800 text-xs">
+                {order.progressStage}
+              </p>
             </div>
           </div>
 
           <div className="mt-6">
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Description</h2>
-            <p className="text-slate-600 leading-relaxed">{order.instructions}</p>
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+              Description
+            </h2>
+            <p className="text-slate-600 leading-relaxed">
+              {order.instructions}
+            </p>
           </div>
 
-          {/* Client info for editor */}
           {mode === "editor" && order.clientId && clientProfileLink && (
             <p className="mt-4 text-sm">
               Client:{" "}
-              <Link to={clientProfileLink} className="font-bold text-green-600 hover:underline">
+              <Link
+                to={clientProfileLink}
+                className="font-bold text-green-600 hover:underline"
+              >
                 {order.clientId.username}
               </Link>
             </p>
           )}
 
-          {/* Editor info for client */}
           {mode === "client" && order.assignedEditorId && (
             <p className="mt-4 text-sm text-slate-600">
               Editor: <strong>{order.assignedEditorId.username}</strong>
@@ -135,17 +171,22 @@ const TaskDetailView = ({
             </p>
           )}
 
-          {/* Admin: both client + editor info inline */}
           {isAdmin && (
             <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
               {order.clientId && (
                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={order.clientId.avatar} />
-                    <AvatarFallback>{(order.clientId.username || "C").slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {(order.clientId.username || "C")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-[10px] font-black uppercase text-slate-400">Client</p>
+                    <p className="text-[10px] font-black uppercase text-slate-400">
+                      Client
+                    </p>
                     <Link
                       to={`/admin/users/${order.clientId._id}`}
                       className="font-bold text-slate-800 hover:text-green-600 flex items-center gap-1"
@@ -153,7 +194,9 @@ const TaskDetailView = ({
                       {order.clientId.username}
                       <Eye size={12} className="text-slate-400" />
                     </Link>
-                    <p className="text-xs text-slate-500">{order.clientId.email}</p>
+                    <p className="text-xs text-slate-500">
+                      {order.clientId.email}
+                    </p>
                   </div>
                 </div>
               )}
@@ -161,10 +204,16 @@ const TaskDetailView = ({
                 <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={order.assignedEditorId.avatar} />
-                    <AvatarFallback>{(order.assignedEditorId.username || "E").slice(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {(order.assignedEditorId.username || "E")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-[10px] font-black uppercase text-slate-400">Assigned Editor</p>
+                    <p className="text-[10px] font-black uppercase text-slate-400">
+                      Assigned Editor
+                    </p>
                     <Link
                       to={`/admin/users/${order.assignedEditorId._id}`}
                       className="font-bold text-slate-800 hover:text-green-600 flex items-center gap-1"
@@ -172,7 +221,9 @@ const TaskDetailView = ({
                       {order.assignedEditorId.username}
                       <Eye size={12} className="text-slate-400" />
                     </Link>
-                    <p className="text-xs text-slate-500">{order.assignedEditorId.email}</p>
+                    <p className="text-xs text-slate-500">
+                      {order.assignedEditorId.email}
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -183,17 +234,20 @@ const TaskDetailView = ({
             </div>
           )}
 
-          {/* Publish button (client) */}
           {order.status === "draft" && mode === "client" && onPublish && (
-            <Button onClick={onPublish} className="mt-6 bg-green-600 hover:bg-green-700">
+            <Button
+              onClick={onPublish}
+              className="mt-6 bg-green-600 hover:bg-green-700"
+            >
               Publish project
             </Button>
           )}
 
-          {/* Editor apply */}
           {canApply && (
             <div className="mt-8 pt-6 border-t border-slate-100">
-              <h2 className="font-bold text-slate-800 mb-3">Apply for this task</h2>
+              <h2 className="font-bold text-slate-800 mb-3">
+                Apply for this task
+              </h2>
               <textarea
                 className="w-full border border-slate-200 rounded-xl p-3 text-sm mb-3"
                 rows={3}
@@ -201,14 +255,15 @@ const TaskDetailView = ({
                 onChange={(e) => setApplyMsg(e.target.value)}
                 placeholder="Why you're a great fit…"
               />
-              <Button onClick={onApply} className="gap-2 bg-slate-900 hover:bg-green-600">
+              <Button
+                onClick={onApply}
+                className="gap-2 bg-slate-900 hover:bg-green-600"
+              >
                 <Send size={16} /> Submit application
               </Button>
             </div>
           )}
         </div>
-
-        {/* ── Applications ── */}
         {showApplications && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
             <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest flex items-center gap-2">
@@ -225,46 +280,68 @@ const TaskDetailView = ({
                   rejected: "bg-red-100 text-red-700",
                 };
                 return (
-                  <div key={app._id} className="flex flex-wrap items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                  <div
+                    key={app._id}
+                    className="flex flex-wrap items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100"
+                  >
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={ed?.avatar} />
-                      <AvatarFallback>{(ed?.username || "E").slice(0, 2).toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>
+                        {(ed?.username || "E").slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-[200px]">
                       <Link
-                        to={isAdmin ? `/admin/users/${edId}` : `/editor/profile/${edId}`}
+                        to={
+                          isAdmin
+                            ? `/admin/users/${edId}`
+                            : `/editor/profile/${edId}`
+                        }
                         className="font-bold text-slate-900 hover:text-green-600 flex items-center gap-1"
                       >
                         <User size={14} /> {ed?.username || "Editor"}
                       </Link>
-                      <p className="text-xs text-slate-500 mt-0.5">{ed?.email}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {ed?.email}
+                      </p>
                       {isAdmin && (
-                        <p className="text-[10px] font-mono text-slate-400 mt-0.5">ID: {edId}</p>
+                        <p className="text-[10px] font-mono text-slate-400 mt-0.5">
+                          ID: {edId}
+                        </p>
                       )}
                       {app.message && (
-                        <p className="text-sm text-slate-600 mt-2 italic">&quot;{app.message}&quot;</p>
+                        <p className="text-sm text-slate-600 mt-2 italic">
+                          &quot;{app.message}&quot;
+                        </p>
                       )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {isAdmin && (
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${statusColors[app.status] || "bg-slate-100 text-slate-500"}`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${statusColors[app.status] || "bg-slate-100 text-slate-500"}`}
+                        >
                           {app.status}
                         </span>
                       )}
-                      {(mode === "client" || isAdmin) && app.status === "pending" && (
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => onAcceptApplication?.(app._id)}
-                          >
-                            Accept
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => onRejectApplication?.(app._id)}>
-                            Reject
-                          </Button>
-                        </div>
-                      )}
+                      {(mode === "client" || isAdmin) &&
+                        app.status === "pending" && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={() => onAcceptApplication?.(app._id)}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => onRejectApplication?.(app._id)}
+                            >
+                              Reject
+                            </Button>
+                          </div>
+                        )}
                     </div>
                   </div>
                 );
@@ -273,22 +350,29 @@ const TaskDetailView = ({
           </section>
         )}
 
-        {/* ── Client info card (editor view) ── */}
         {isAssignedEditor && order.clientId && (
-          <ClientInfoCard client={order.clientId} order={order} attachments={attachments} />
+          <ClientInfoCard
+            client={order.clientId}
+            order={order}
+            attachments={attachments}
+          />
         )}
 
-        {/* Admin: full client info card */}
         {isAdmin && order.clientId && (
-          <ClientInfoCard client={order.clientId} order={order} attachments={attachments} />
+          <ClientInfoCard
+            client={order.clientId}
+            order={order}
+            attachments={attachments}
+          />
         )}
-
-        {/* ── Task list ── */}
         {data.tasks?.length > 0 && (
-          <TaskListSection tasks={data.tasks} projectId={order._id} mode={mode} />
+          <TaskListSection
+            tasks={data.tasks}
+            projectId={order._id}
+            mode={mode}
+          />
         )}
 
-        {/* ── Timer panel (editor + admin) ── */}
         {(isAssignedEditor || isAdmin) && (
           <TaskTimerPanel
             tasks={data.tasks || []}
@@ -300,7 +384,6 @@ const TaskDetailView = ({
           />
         )}
 
-        {/* ── Payment (client + admin) ── */}
         {(mode === "client" || isAdmin) && order.assignedEditorId && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
             <h2 className="font-black text-slate-900 mb-3 uppercase text-[10px] tracking-widest flex items-center gap-2">
@@ -310,21 +393,29 @@ const TaskDetailView = ({
             <p className="text-sm text-slate-600 mb-4">
               Review amount, due date, and payment status for this project.
             </p>
-            <Link to={isAdmin ? `/admin/orders/${order._id}/payment` : `/client/projects/${order._id}/payment`}>
-              <Button variant="outline" className="border-green-200 text-green-700 hover:bg-green-50">
+            <Link
+              to={
+                isAdmin
+                  ? `/admin/orders/${order._id}/payment`
+                  : `/client/projects/${order._id}/payment`
+              }
+            >
+              <Button
+                variant="outline"
+                className="border-green-200 text-green-700 hover:bg-green-50"
+              >
                 View payment details
               </Button>
             </Link>
           </section>
         )}
 
-        {/* ── Attachments ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-          <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Attachments</h2>
+          <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">
+            Attachments
+          </h2>
           <TaskAttachments attachments={attachments} />
         </section>
-
-        {/* ── Submissions / Deliveries ── */}
         {data.submissions?.length > 0 && (
           <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
             <h2 className="font-bold text-slate-800 mb-4">Editor deliveries</h2>
@@ -336,68 +427,90 @@ const TaskDetailView = ({
                 rel="noreferrer"
                 className="flex items-center justify-between p-3 bg-slate-50 rounded-xl mb-2 hover:bg-green-50 text-sm"
               >
-                <span className="font-medium text-slate-800">v{s.version}: {s.fileName || "Delivery"}</span>
-                <span className="text-green-600 font-bold text-xs uppercase">Download</span>
+                <span className="font-medium text-slate-800">
+                  v{s.version}: {s.fileName || "Delivery"}
+                </span>
+                <span className="text-green-600 font-bold text-xs uppercase">
+                  Download
+                </span>
               </a>
             ))}
           </section>
         )}
 
-        {/* ── Activity timeline ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-          <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">Activity history</h2>
+          <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">
+            Activity history
+          </h2>
           <ActivityTimeline activity={activity} />
         </section>
 
-        {/* ── Comments ── */}
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-          <h2 className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Messages</h2>
-          <TaskComments orderId={order._id} comments={comments} onPosted={onCommentPosted} />
+          <h2 className="font-black text-slate-900 uppercase text-[10px] tracking-widest">
+            Messages
+          </h2>
+          <TaskComments
+            orderId={order._id}
+            comments={comments}
+            onPosted={onCommentPosted}
+          />
         </section>
 
-        {/* ── Revision / Confirm delivery (client + admin) ── */}
-        {(mode === "client" || isAdmin) && ["delivered", "revision_requested"].includes(order.status) && (
-          <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 space-y-4">
-            <h2 className="font-bold text-slate-800">Review & delivery</h2>
-            <div>
-              <label className="text-xs font-bold uppercase text-slate-400">Revision reason</label>
-              <textarea
-                className="w-full mt-1 border border-slate-200 rounded-xl p-3 text-sm"
-                rows={3}
-                value={revisionReason}
-                onChange={(e) => setRevisionReason(e.target.value)}
-              />
-              <Button onClick={onRequestRevision} variant="outline" className="mt-2 gap-2">
-                <RotateCcw size={16} /> Request revision
+        {(mode === "client" || isAdmin) &&
+          ["delivered", "revision_requested"].includes(order.status) && (
+            <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6 space-y-4">
+              <h2 className="font-bold text-slate-800">Review & delivery</h2>
+              <div>
+                <label className="text-xs font-bold uppercase text-slate-400">
+                  Revision reason
+                </label>
+                <textarea
+                  className="w-full mt-1 border border-slate-200 rounded-xl p-3 text-sm"
+                  rows={3}
+                  value={revisionReason}
+                  onChange={(e) => setRevisionReason(e.target.value)}
+                />
+                <Button
+                  onClick={onRequestRevision}
+                  variant="outline"
+                  className="mt-2 gap-2"
+                >
+                  <RotateCcw size={16} /> Request revision
+                </Button>
+              </div>
+              <Button
+                onClick={onConfirmDelivery}
+                className="gap-2 bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle size={16} /> Confirm delivery
               </Button>
-            </div>
-            <Button onClick={onConfirmDelivery} className="gap-2 bg-green-600 hover:bg-green-700">
-              <CheckCircle size={16} /> Confirm delivery
-            </Button>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* ── Star rating (client only) ── */}
-        {mode === "client" && order.status === "completed" && !order.clientRating && (
-          <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
-            <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <Star className="text-amber-500" size={20} /> Rate your editor
-            </h2>
-            <StarRating value={rating} onChange={setRating} size={28} />
-            <textarea
-              className="w-full border border-slate-200 rounded-xl p-3 text-sm mt-4 mb-3"
-              rows={4}
-              placeholder="Write your review (optional)"
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-            />
-            <Button onClick={onSubmitReview} className="bg-slate-900 hover:bg-green-600">
-              Submit review
-            </Button>
-          </section>
-        )}
+        {mode === "client" &&
+          order.status === "completed" &&
+          !order.clientRating && (
+            <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
+              <h2 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <Star className="text-amber-500" size={20} /> Rate your editor
+              </h2>
+              <StarRating value={rating} onChange={setRating} size={28} />
+              <textarea
+                className="w-full border border-slate-200 rounded-xl p-3 text-sm mt-4 mb-3"
+                rows={4}
+                placeholder="Write your review (optional)"
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+              />
+              <Button
+                onClick={onSubmitReview}
+                className="bg-slate-900 hover:bg-green-600"
+              >
+                Submit review
+              </Button>
+            </section>
+          )}
 
-        {/* ── Editor review display ── */}
         {data.editorReview && (
           <section className="bg-green-50 border border-green-100 rounded-2xl p-6 mb-6">
             <p className="text-[10px] font-black uppercase text-green-700 mb-2">
@@ -405,16 +518,18 @@ const TaskDetailView = ({
             </p>
             <StarRating value={data.editorReview.rating} readOnly size={20} />
             {data.editorReview.feedback && (
-              <p className="text-sm text-slate-600 mt-2 italic">"{data.editorReview.feedback}"</p>
+              <p className="text-sm text-slate-600 mt-2 italic">
+                "{data.editorReview.feedback}"
+              </p>
             )}
             {isAdmin && (
               <p className="text-[10px] font-mono text-slate-400 mt-2">
-                Review ID: {data.editorReview._id} · Rating: {data.editorReview.rating}/5
+                Review ID: {data.editorReview._id} · Rating:{" "}
+                {data.editorReview.rating}/5
               </p>
             )}
           </section>
         )}
-
       </div>
     </div>
   );

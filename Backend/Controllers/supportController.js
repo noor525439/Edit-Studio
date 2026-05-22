@@ -454,8 +454,8 @@ export const getSupportStats = async (req, res) => {
 export const replyByUser = async (req, res) => {
   try {
     const { messageId } = req.params;
-    const { message } = req.body;  // frontend "message" bhej raha hai
-    const userId = req.userId;     // aapka auth middleware userId set karta hai
+    const { message } = req.body;  // Frontend se text "message" ke roop mein aa raha hai
+    const userId = req.userId;     // Auth middleware se milne wali user ki ID
 
     if (!message?.trim()) {
       return res.status(400).json({
@@ -463,7 +463,7 @@ export const replyByUser = async (req, res) => {
       });
     }
 
-    // Make sure ticket is closed nahi hai
+    // Check karein ki ticket user ki apni hi hai aur exist karti hai
     const existing = await SupportMessage.findOne({
       _id: messageId, userId
     });
@@ -480,36 +480,57 @@ export const replyByUser = async (req, res) => {
       });
     }
 
+    // Process file uploads (agar user reply mein bhi files bhej sakta hai)
+    let uploadedAttachments = [];
+    if (req.files && req.files.length > 0) {
+      uploadedAttachments = req.files.map(file => ({
+        filename: file.originalname,
+        fileUrl: file.path, 
+        fileType: file.mimetype
+      }));
+    }
+
     const updated = await SupportMessage.findByIdAndUpdate(
       messageId,
       {
         $push: {
-         replies: {
-  replyBy: adminId,
-  replyByRole: adminRole,
-  replyMessage,
-  isAdminReply: true,   // ← yeh add karein
-  attachments: uploadedAttachments,
-  replyedAt: new Date(),
-  isRead: false
-}
+          replies: {
+            replyBy: userId,              // Sahi ID variable (User ki apni ID)
+            replyByRole: 'client',        // Role hamesha client/user hoga
+            replyMessage: message,        // Jo message body se aaya
+            attachments: uploadedAttachments,
+            replyedAt: new Date(),
+            isRead: false
+          }
         },
-        isReadByAdmin: false,  // admin ko unread dikhao
+        isReadByAdmin: false,  // Admin ko unread dikhane ke liye
         lastUpdatedBy: 'client'
       },
       { new: true }
-    );
+    )
+    .populate('userId', 'firstName lastName email profilePicture')
+    .populate('replies.replyBy', 'firstName lastName profilePicture');
+
+    // Real-time updates ke liye socket emit karein (Taaki admin panel par foran dikhe)
+    const socketServer = req.app.get('io');
+    if (socketServer) {
+      socketServer.to('admin_room').emit('support_message_reply', {
+        messageId,
+        replyMessage: message,
+        replyedAt: new Date()
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: "Reply sent",
+      message: "Reply sent successfully",
       data: updated
     });
 
   } catch (error) {
     console.error("User reply error:", error);
     return res.status(500).json({
-      success: false, message: "Failed to send reply"
+      success: false, message: "Failed to send reply", error: error.message
     });
   }
 };

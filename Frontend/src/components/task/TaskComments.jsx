@@ -5,7 +5,12 @@ import { apiPost, WORKFLOW_API } from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-const TaskComments = ({ orderId, comments = [], onPosted, isAdmin = false }) => {
+const TaskComments = ({
+  orderId,
+  comments = [],
+  onPosted,
+  isAdmin = false,
+}) => {
   const { user } = getData();
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
@@ -30,10 +35,13 @@ const TaskComments = ({ orderId, comments = [], onPosted, isAdmin = false }) => 
     <div className="space-y-4">
       <ul className="space-y-3 max-h-96 overflow-y-auto pr-1">
         {comments.length === 0 ? (
-          <li className="text-sm text-slate-400 italic">No messages yet. Start the conversation.</li>
+          <li className="text-sm text-slate-400 italic">
+            No messages yet. Start the conversation.
+          </li>
         ) : (
           comments.map((c) => {
-            const mine = String(c.senderId?._id || c.senderId) === String(user?._id);
+            const mine =
+              String(c.senderId?._id || c.senderId) === String(user?._id);
             const senderRole = c.senderId?.role || "";
             const isAdminSender = String(senderRole).toLowerCase() === "admin";
 
@@ -48,22 +56,24 @@ const TaskComments = ({ orderId, comments = [], onPosted, isAdmin = false }) => 
               >
                 <p className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1 flex items-center gap-1">
                   {c.senderId?.username || "User"}
-                  {/* Admin: show role badge next to sender name */}
                   {isAdmin && senderRole && (
-                    <span className={`ml-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
-                      isAdminSender
-                        ? "bg-amber-200 text-amber-800"
-                        : mine
-                        ? "bg-white/20 text-white"
-                        : "bg-slate-200 text-slate-600"
-                    }`}>
+                    <span
+                      className={`ml-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
+                        isAdminSender
+                          ? "bg-amber-200 text-amber-800"
+                          : mine
+                            ? "bg-white/20 text-white"
+                            : "bg-slate-200 text-slate-600"
+                      }`}
+                    >
                       {senderRole}
                     </span>
                   )}
                 </p>
                 <p>{c.text}</p>
-                <p className="text-[9px] mt-2 opacity-50">{new Date(c.createdAt).toLocaleString()}</p>
-                {/* Admin: show sender ID and comment ID */}
+                <p className="text-[9px] mt-2 opacity-50">
+                  {new Date(c.createdAt).toLocaleString()}
+                </p>
                 {isAdmin && (
                   <p className="text-[9px] mt-1 opacity-40 font-mono">
                     msg: {c._id} · sender: {c.senderId?._id || c.senderId}
@@ -74,11 +84,12 @@ const TaskComments = ({ orderId, comments = [], onPosted, isAdmin = false }) => 
           })
         )}
       </ul>
-
-      {/* Admin can also post comments */}
       <form onSubmit={submit} className="flex gap-2">
         {isAdmin && (
-          <span className="flex items-center px-2 text-amber-600" title="Posting as admin">
+          <span
+            className="flex items-center px-2 text-amber-600"
+            title="Posting as admin"
+          >
             <ShieldCheck size={16} />
           </span>
         )}
@@ -88,7 +99,11 @@ const TaskComments = ({ orderId, comments = [], onPosted, isAdmin = false }) => 
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <Button type="submit" disabled={sending} className="bg-slate-900 hover:bg-green-600 px-4">
+        <Button
+          type="submit"
+          disabled={sending}
+          className="bg-slate-900 hover:bg-green-600 px-4"
+        >
           <Send size={16} />
         </Button>
       </form>

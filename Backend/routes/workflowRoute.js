@@ -3,6 +3,24 @@ import { isAuthenticated } from "../middleware/authenticated.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
 import { isAdmin } from "../middleware/isAdmin.js";
 import {
+  getOrderById,
+  publishOrder,
+  getMarketplaceTasks,
+  applyForProject,
+  acceptApplication,
+  rejectApplication,
+  instantHire,
+  updateProgressPercent,
+  createSubmission,
+  getSubmissions,
+  requestRevision,
+  confirmDelivery,
+  rateProject,
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getAdminUsers,
+  getAdminUserById,
   getAdminCommissionOverview,
   createOrder,
   createOrGetThread,
@@ -32,26 +50,6 @@ import {
   deleteReview,
   getAdminActivities,
   getAdminOverview,
-} from "../Controllers/workflowController.js";
-import {
-  getOrderById,
-  publishOrder,
-  getMarketplaceTasks,
-  applyForProject,
-  acceptApplication,
-  rejectApplication,
-  instantHire,
-  updateProgressPercent,
-  createSubmission,
-  getSubmissions,
-  requestRevision,
-  confirmDelivery,
-  rateProject,
-  getNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
-  getAdminUsers,
-  getAdminUserById,
 } from "../Controllers/projectWorkflowController.js";
 import {
   getClientPublicProfile,
@@ -125,7 +123,6 @@ router.get("/notifications", isAuthenticated, getNotifications);
 router.patch("/notifications/:notificationId/read", isAuthenticated, markNotificationRead);
 router.patch("/notifications/read-all", isAuthenticated, markAllNotificationsRead);
 
-// Client Review Panel API — mounted at /api/reviews in server.js
 export const reviewApiRouter = express.Router();
 reviewApiRouter.post("/", isAuthenticated, authorizeRole("client"), submitReview);
 reviewApiRouter.get("/project/:id", isAuthenticated, getProjectReviews);

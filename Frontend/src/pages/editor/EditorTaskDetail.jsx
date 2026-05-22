@@ -82,7 +82,6 @@ const EditorTaskDetail = () => {
         clientProfileLink={clientId ? `/editor/client-profile/${clientId}` : null}
       />
 
-      {/* Project reviews — editor view */}
       <div className="max-w-6xl mx-auto pb-10 -mt-4">
         <section className="bg-white border border-slate-200 rounded-2xl p-8">
           <h2 className="text-lg font-bold text-slate-900 mb-1">Client reviews</h2>

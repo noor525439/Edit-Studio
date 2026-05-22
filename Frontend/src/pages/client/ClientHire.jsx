@@ -9,15 +9,14 @@ const ClientHire = () => {
   const { editorId } = useParams();
   const navigate = useNavigate();
   const [editorName, setEditorName] = useState("Editor");
-  const [realEditorId, setRealEditorId] = useState(null); // 👈 null rakho, "" nahi
+  const [realEditorId, setRealEditorId] = useState(null);
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
     apiGet(`${WORKFLOW_API}/editors/profile/${editorId}`)
       .then((res) => {
         const name =
-          res.data.data?.editorProfile?.name ||
-          res.data.data?.user?.username;
+          res.data.data?.editorProfile?.name || res.data.data?.user?.username;
         const actualId =
           res.data.data?.user?._id ||
           res.data.data?.editorProfile?._id ||
@@ -27,14 +26,12 @@ const ClientHire = () => {
         if (actualId) setRealEditorId(actualId);
       })
       .catch(() => {
-        // Fallback: agar fetch fail ho aur editorId email nahi hai toh use karo
         if (!String(editorId).includes("@")) {
           setRealEditorId(editorId);
         }
       });
   }, [editorId]);
 
-  // 👇 Jab tak realEditorId nahi mili, modal render mat karo
   if (realEditorId === null) {
     return (
       <RoleGuard allowedRoles={CLIENT_ROLES}>
@@ -49,7 +46,7 @@ const ClientHire = () => {
     <RoleGuard allowedRoles={CLIENT_ROLES}>
       <div className="min-h-screen bg-[#F8FAFC] p-10">
         <HireNowModal
-          editorId={realEditorId} // 👈 Sirf verified ObjectId pass hogi
+          editorId={realEditorId}
           editorName={editorName}
           open={open}
           onClose={() => {

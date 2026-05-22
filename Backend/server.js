@@ -10,7 +10,7 @@ import http from "http";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { setSocketServer, registerUserSocket, unregisterUserSocket } from "./utils/socket.js";
-import { stripeWebhook } from "./Controllers/workflowController.js";
+import { stripeWebhook } from "./Controllers/ProjectWorkflowController.js";
 
 const app = express()
 const server = http.createServer(app);
@@ -81,11 +81,7 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
     registerUserSocket(socket.userId, socket.id);
-    
-    // Join user to their personal room
     socket.join(`user_${socket.userId}`);
-    
-    // Join admin room if user is admin (you may need to fetch user role)
     socket.on("join_admin_room", (role) => {
         if (role === 'admin') {
             socket.join('admin_room');

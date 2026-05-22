@@ -25,14 +25,24 @@ const computeLive = (task) => {
   const estimatedSecs = (task.estimatedDuration || 60) * 60;
   let elapsed = task.elapsedSeconds || 0;
   if (task.timerStatus === "running" && task.startedAt) {
-    elapsed += Math.floor((Date.now() - new Date(task.startedAt).getTime()) / 1000);
+    elapsed += Math.floor(
+      (Date.now() - new Date(task.startedAt).getTime()) / 1000,
+    );
   }
   const remaining = Math.max(0, estimatedSecs - elapsed);
-  const overdue = task.isOverdue || task.isOverdueLive || elapsed >= estimatedSecs;
+  const overdue =
+    task.isOverdue || task.isOverdueLive || elapsed >= estimatedSecs;
   return { elapsed, remaining, overdue, estimatedSecs };
 };
 
-const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate, onCreateTask }) => {
+const TaskTimerPanel = ({
+  tasks = [],
+  orderId,
+  canControl,
+  onRefresh,
+  canCreate,
+  onCreateTask,
+}) => {
   const [localTasks, setLocalTasks] = useState(tasks);
   const [newTask, setNewTask] = useState({ title: "", estimatedDuration: 60 });
 
@@ -40,7 +50,6 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
     setLocalTasks(tasks);
   }, [tasks]);
 
-  // Tick every second for running timers
   useEffect(() => {
     const hasRunning = localTasks.some((t) => t.timerStatus === "running");
     if (!hasRunning) return;
@@ -51,7 +60,9 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
   const updateTimer = async (taskId, action) => {
     try {
       await apiPut(`${WORKFLOW_API}/tasks/${taskId}/timer`, { action });
-      toast.success(action === "complete" ? "Task completed" : `Timer ${action}ed`);
+      toast.success(
+        action === "complete" ? "Task completed" : `Timer ${action}ed`,
+      );
       onRefresh?.();
     } catch (e) {
       toast.error(e?.response?.data?.message || "Timer update failed");
@@ -98,7 +109,9 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
             <Input
               className="mt-1"
               value={newTask.title}
-              onChange={(e) => setNewTask((t) => ({ ...t, title: e.target.value }))}
+              onChange={(e) =>
+                setNewTask((t) => ({ ...t, title: e.target.value }))
+              }
               placeholder="e.g. Color grading pass 1"
             />
           </div>
@@ -109,10 +122,15 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
               min={1}
               className="mt-1"
               value={newTask.estimatedDuration}
-              onChange={(e) => setNewTask((t) => ({ ...t, estimatedDuration: e.target.value }))}
+              onChange={(e) =>
+                setNewTask((t) => ({ ...t, estimatedDuration: e.target.value }))
+              }
             />
           </div>
-          <Button onClick={handleCreate} className="sm:col-span-3 bg-slate-900 hover:bg-green-600">
+          <Button
+            onClick={handleCreate}
+            className="sm:col-span-3 bg-slate-900 hover:bg-green-600"
+          >
             Add task
           </Button>
         </div>
@@ -131,11 +149,18 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div>
                   <p className="font-bold text-slate-800">{task.title}</p>
-                  {task.details && <p className="text-xs text-slate-500 mt-0.5">{task.details}</p>}
+                  {task.details && (
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {task.details}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   {overdue && !isDone && (
-                    <Badge variant="destructive" className="text-[10px] uppercase font-bold">
+                    <Badge
+                      variant="destructive"
+                      className="text-[10px] uppercase font-bold"
+                    >
                       <AlertTriangle size={10} className="mr-1" /> Overdue
                     </Badge>
                   )}
@@ -164,16 +189,31 @@ const TaskTimerPanel = ({ tasks = [], orderId, canControl, onRefresh, canCreate,
 
               {canControl && !isDone && (
                 <div className="flex gap-2 mt-3">
-                  {task.timerStatus === "not_started" || task.timerStatus === "paused" ? (
-                    <Button size="sm" onClick={() => updateTimer(task._id, "start")} className="gap-1 bg-green-600 hover:bg-green-700">
+                  {task.timerStatus === "not_started" ||
+                  task.timerStatus === "paused" ? (
+                    <Button
+                      size="sm"
+                      onClick={() => updateTimer(task._id, "start")}
+                      className="gap-1 bg-green-600 hover:bg-green-700"
+                    >
                       <Play size={14} /> Start task
                     </Button>
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => updateTimer(task._id, "pause")} className="gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateTimer(task._id, "pause")}
+                      className="gap-1"
+                    >
                       <Pause size={14} /> Pause
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => updateTimer(task._id, "complete")} className="gap-1">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => updateTimer(task._id, "complete")}
+                    className="gap-1"
+                  >
                     <CheckCircle size={14} /> Complete
                   </Button>
                 </div>

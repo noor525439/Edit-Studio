@@ -8,12 +8,8 @@ import ForgotPassword from "./pages/ForgotPassword"
 import VerifyOTP from "./pages/VerifyOTP"
 import ChangePassword from "./pages/ChangePassword"
 import Profile from "./pages/Profile"
-import ClientProfile from "./pages/ClientProfile"
-import EditorInfoForm from "./pages/EditorInfoForm"
 import UpdateProfile from "./pages/Updateprofile"
 import AboutPage from "./pages/AboutPage"
-import ContactAdmin from "./pages/ContactAdmin"
-import AdminMessages from "./pages/AdminMessages"
 import PrivacyRiskPage from "./pages/PrivacyRiskPage"
 import VettingStandardsPage from "./pages/VettingStandardsPage"
 import EditorRequirementsPage from "./pages/EditorRequirementsPage"
@@ -34,6 +30,9 @@ import ClientProjects from "./pages/client/ClientProjects"
 import ClientProjectCreate from "./pages/client/ClientProjectCreate"
 import ClientProjectDetail from "./pages/client/ClientProjectDetail"
 import ClientHire from "./pages/client/ClientHire"
+import ClientProfile from "./pages/client/ClientProfile"
+import ClientNotifications from "./pages/client/ClientNotifications"
+
 import EditorDashboardPage from "./pages/editor/EditorDashboardPage"
 import EditorTasks from "./pages/editor/EditorTasks"
 import EditorTaskDetail from "./pages/editor/EditorTaskDetail"
@@ -41,15 +40,20 @@ import EditorSubmissions from "./pages/editor/EditorSubmissions"
 import EditorClientProfile from "./pages/editor/EditorClientProfile"
 import EditorPublicProfile from "./pages/editor/EditorPublicProfile"
 import EditorGigs from "./pages/editor/EditorGigs"
+import EditorInfoForm from "./pages/editor/EditorInfoForm"
+
 import AdminProjects from "./pages/admin/AdminProjects"
 import AdminDashboard from "./pages/admin/AdminDashboard"
 import AdminProjectDetail from "./pages/admin/AdminProjectDetail"
 import AdminUserDetail from "./pages/admin/AdminUserDetail"
 import AdminNotifications from "./pages/admin/AdminNotifications"
 import AdminActivities from "./pages/admin/AdminActivities"
-import ClientNotifications from "./pages/client/ClientNotifications"
+import AdminMessages from "./pages/admin/AdminMessages"
+
+
 import { dashboardPath } from "./lib/roles"
 import { getData } from "./context/userContext"
+import ContactAdmin from "./pages/admin/ContactAdmin"
 
 const withNav = (el) => <><Navbar />{el}</>
 
@@ -94,6 +98,7 @@ const router = createBrowserRouter([
   { path: '/client/notifications', element: withNav(<ClientNotifications />) },
   { path: '/admin/notifications', element: withNav(<AdminNotifications />) },
   { path: '/admin/messages', element: withNav(<AdminMessages />) },
+  { path: '/contact-admin', element: <ContactAdmin /> },
 
   // Fallbacks for unknown routes
   { path: '*', element: <Navigate to="/" replace /> },
@@ -110,7 +115,6 @@ const router = createBrowserRouter([
   { path: '/profile', element: withNav(<Profile />) },
   { path: '/update-profile', element: withNav(<UpdateProfile />) },
   { path: '/aboutus', element: <AboutPage /> },
-  { path: '/contact-admin', element: <ContactAdmin /> },
   { path: '/risk-privacy', element: <PrivacyRiskPage /> },
   { path: '/vetting-standards', element: <VettingStandardsPage /> },
   { path: '/vetting-editor-standards', element: <EditorRequirementsPage /> },

@@ -22,7 +22,6 @@ export const authorizeRole = (...roles) => {
 
   return async (req, res, next) => {
     try {
-      // ⬇️ CHECK: Agar req.userId mein email hai toh findOne use karein, warna findById
       let currentUser;
       const isEmail = String(req.userId || "").includes('@');
 

@@ -7,7 +7,7 @@ const taskSchema = new mongoose.Schema(
     assignedById: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     title: { type: String, required: true, trim: true },
     details: { type: String, trim: true, default: "" },
-    estimatedDuration: { type: Number, default: 60, min: 1 }, // minutes
+    estimatedDuration: { type: Number, default: 60, min: 1 },
     timerStatus: { type: String, enum: ["not_started", "running", "paused", "completed"], default: "not_started" },
     startedAt: { type: Date, default: null },
     completedAt: { type: Date, default: null },

@@ -97,7 +97,6 @@ const supportMessageSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster queries
 supportMessageSchema.index({ userId: 1, createdAt: -1 });
 supportMessageSchema.index({ status: 1, isReadByAdmin: 1 });
 

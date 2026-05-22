@@ -25,7 +25,9 @@ const ROLE_COLORS = {
 
 const ActivityTimeline = ({ activity = [], isAdmin = false }) => {
   if (!activity.length) {
-    return <p className="text-sm text-slate-400 italic py-4">No activity yet.</p>;
+    return (
+      <p className="text-sm text-slate-400 italic py-4">No activity yet.</p>
+    );
   }
 
   return (
@@ -41,9 +43,10 @@ const ActivityTimeline = ({ activity = [], isAdmin = false }) => {
               <p className="text-sm font-bold text-slate-800">
                 {ACTION_LABELS[item.action] || item.action}
               </p>
-              {/* Admin: show role badge per activity */}
               {isAdmin && item.actorRole && (
-                <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${roleColor}`}>
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${roleColor}`}
+                >
                   {item.actorRole}
                 </span>
               )}
@@ -52,8 +55,6 @@ const ActivityTimeline = ({ activity = [], isAdmin = false }) => {
             {item.details && (
               <p className="text-xs text-slate-500 mt-0.5">{item.details}</p>
             )}
-
-            {/* Admin: show meta data if present */}
             {isAdmin && item.meta && Object.keys(item.meta).length > 0 && (
               <p className="text-[10px] font-mono text-slate-400 mt-0.5 bg-slate-50 rounded px-2 py-1 inline-block">
                 {JSON.stringify(item.meta)}
@@ -66,11 +67,12 @@ const ActivityTimeline = ({ activity = [], isAdmin = false }) => {
               <span className="text-slate-300">·</span>
               <Clock size={10} />
               {new Date(item.createdAt).toLocaleString()}
-              {/* Admin: show activity ID */}
               {isAdmin && (
                 <>
                   <span className="text-slate-300">·</span>
-                  <span className="font-mono normal-case tracking-normal text-slate-300">{item._id}</span>
+                  <span className="font-mono normal-case tracking-normal text-slate-300">
+                    {item._id}
+                  </span>
                 </>
               )}
             </p>

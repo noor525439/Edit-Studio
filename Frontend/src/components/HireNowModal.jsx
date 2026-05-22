@@ -24,11 +24,9 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
         const res = await apiGet(`${WORKFLOW_API}/marketplace`);
         const mine = (res.data.data || []).filter(
           (p) =>
-            !p.assignedEditorId && ["draft", "published"].includes(p.status)
+            !p.assignedEditorId && ["draft", "published"].includes(p.status),
         );
         setProjects(mine);
-
-        // If returning from create-order flow, auto-select that new order
         if (preSelectedOrderId) {
           setSelectedProject(preSelectedOrderId);
         } else if (mine.length > 0) {
@@ -44,11 +42,12 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
   }, [open]);
 
   const handleConfirm = async () => {
-    // No project selected → redirect to create order first
     if (!selectedProject) {
       toast.info("Please create a project before hiring an editor.");
       onClose?.();
-      navigate(`/client/projects/create?editorId=${editorId}&editorName=${encodeURIComponent(editorName || "")}`);
+      navigate(
+        `/client/projects/create?editorId=${editorId}&editorName=${encodeURIComponent(editorName || "")}`,
+      );
       return;
     }
 
@@ -64,12 +63,16 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
         orderId: selectedProject,
         paymentConfirmed: true,
       });
-      toast.success(`${editorName || "Editor"} hired successfully — project started!`);
+      toast.success(
+        `${editorName || "Editor"} hired successfully — project started!`,
+      );
       onClose?.();
       const orderId = res.data.data?._id;
       navigate(orderId ? `/client/projects/${orderId}` : "/client/dashboard");
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Hire failed. Please try again.");
+      toast.error(
+        err?.response?.data?.message || "Hire failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
@@ -83,8 +86,6 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden">
-
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-100">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-green-100 rounded-xl text-green-600">
@@ -104,8 +105,6 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
         </div>
 
         <div className="p-6 space-y-5">
-
-          {/* Project selector */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 block">
               Select a project
@@ -117,13 +116,18 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
                 Loading your projects…
               </div>
             ) : noProjects ? (
-              // No projects available
               <div className="flex items-start gap-3 p-4 rounded-xl border border-dashed border-amber-300 bg-amber-50">
-                <PlusCircle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+                <PlusCircle
+                  size={18}
+                  className="text-amber-500 shrink-0 mt-0.5"
+                />
                 <div>
-                  <p className="text-sm font-bold text-amber-800">No projects found</p>
+                  <p className="text-sm font-bold text-amber-800">
+                    No projects found
+                  </p>
                   <p className="text-xs text-amber-600 mt-0.5">
-                    You need to create a project before hiring an editor. Click below to get started.
+                    You need to create a project before hiring an editor. Click
+                    below to get started.
                   </p>
                 </div>
               </div>
@@ -161,8 +165,6 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
               </div>
             </label>
           )}
-
-          {/* Action button */}
           <Button
             onClick={handleConfirm}
             disabled={loading || fetching}
@@ -180,7 +182,6 @@ const HireNowModal = ({ editorId, editorName, open, onClose }) => {
               "Confirm Hire"
             )}
           </Button>
-
         </div>
       </div>
     </div>

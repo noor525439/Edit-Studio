@@ -1,9 +1,22 @@
-import { Mail, Phone, Calendar, FileText, ShieldCheck, DollarSign, Tag } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Calendar,
+  FileText,
+  ShieldCheck,
+  DollarSign,
+  Tag,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=client";
 
-const ClientInfoCard = ({ client, order, attachments = [], isAdmin = false }) => {
+const ClientInfoCard = ({
+  client,
+  order,
+  attachments = [],
+  isAdmin = false,
+}) => {
   if (!client || !order) return null;
 
   const name = client.username || "Client";
@@ -38,16 +51,27 @@ const ClientInfoCard = ({ client, order, attachments = [], isAdmin = false }) =>
               <Phone size={12} /> Phone not provided
             </p>
           )}
-          {/* Admin: show client ID and role */}
           {isAdmin && (
             <div className="mt-2 space-y-0.5">
-              <p className="text-[10px] font-mono text-slate-400">ID: {client._id}</p>
               <p className="text-[10px] font-mono text-slate-400">
-                Role: <span className="text-amber-600 font-bold uppercase">{client.role || "—"}</span>
+                ID: {client._id}
+              </p>
+              <p className="text-[10px] font-mono text-slate-400">
+                Role:{" "}
+                <span className="text-amber-600 font-bold uppercase">
+                  {client.role || "—"}
+                </span>
               </p>
               {client.isVerified !== undefined && (
                 <p className="text-[10px] font-mono text-slate-400">
-                  Verified: <span className={client.isVerified ? "text-green-600" : "text-red-500"}>{client.isVerified ? "Yes" : "No"}</span>
+                  Verified:{" "}
+                  <span
+                    className={
+                      client.isVerified ? "text-green-600" : "text-red-500"
+                    }
+                  >
+                    {client.isVerified ? "Yes" : "No"}
+                  </span>
                 </p>
               )}
             </div>
@@ -57,30 +81,39 @@ const ClientInfoCard = ({ client, order, attachments = [], isAdmin = false }) =>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div className="p-3 bg-slate-50 rounded-xl">
-          <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Project</p>
-          <p className="font-bold text-slate-800 text-sm">{order.projectTitle}</p>
-          {/* Admin: show order status + ID */}
+          <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">
+            Project
+          </p>
+          <p className="font-bold text-slate-800 text-sm">
+            {order.projectTitle}
+          </p>
           {isAdmin && (
-            <p className="text-[10px] font-mono text-slate-400 mt-1">ID: {order._id}</p>
+            <p className="text-[10px] font-mono text-slate-400 mt-1">
+              ID: {order._id}
+            </p>
           )}
         </div>
         <div className="p-3 bg-slate-50 rounded-xl flex items-center gap-2">
           <Calendar className="text-green-600 shrink-0" size={18} />
           <div>
-            <p className="text-[10px] font-bold uppercase text-slate-400">Deadline</p>
+            <p className="text-[10px] font-bold uppercase text-slate-400">
+              Deadline
+            </p>
             <p className="font-bold text-slate-800 text-sm">
-              {order.deadline ? new Date(order.deadline).toLocaleDateString() : "—"}
+              {order.deadline
+                ? new Date(order.deadline).toLocaleDateString()
+                : "—"}
             </p>
           </div>
         </div>
-
-        {/* Admin: budget + hire type */}
         {isAdmin && (
           <>
             <div className="p-3 bg-slate-50 rounded-xl flex items-center gap-2">
               <DollarSign className="text-green-600 shrink-0" size={18} />
               <div>
-                <p className="text-[10px] font-bold uppercase text-slate-400">Budget</p>
+                <p className="text-[10px] font-bold uppercase text-slate-400">
+                  Budget
+                </p>
                 <p className="font-bold text-slate-800 text-sm">
                   PKR {Number(order.autoPriceEstimate || 0).toLocaleString()}
                 </p>
@@ -89,7 +122,9 @@ const ClientInfoCard = ({ client, order, attachments = [], isAdmin = false }) =>
             <div className="p-3 bg-slate-50 rounded-xl flex items-center gap-2">
               <Tag className="text-green-600 shrink-0" size={18} />
               <div>
-                <p className="text-[10px] font-bold uppercase text-slate-400">Hire type</p>
+                <p className="text-[10px] font-bold uppercase text-slate-400">
+                  Hire type
+                </p>
                 <p className="font-bold text-slate-800 text-sm capitalize">
                   {order.hireType?.replace("_", " ") || "—"}
                 </p>
@@ -104,14 +139,17 @@ const ClientInfoCard = ({ client, order, attachments = [], isAdmin = false }) =>
           <p className="text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
             <FileText size={12} /> Description
           </p>
-          <p className="text-sm text-slate-600 leading-relaxed">{order.instructions}</p>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {order.instructions}
+          </p>
         </div>
       )}
 
-      {/* Admin: raw footage link */}
       {isAdmin && order.rawFootageLink && (
         <div className="mb-4">
-          <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Raw footage link</p>
+          <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">
+            Raw footage link
+          </p>
           <a
             href={order.rawFootageLink}
             target="_blank"
@@ -125,7 +163,9 @@ const ClientInfoCard = ({ client, order, attachments = [], isAdmin = false }) =>
 
       {attachments?.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold uppercase text-slate-400 mb-2">Client files</p>
+          <p className="text-[10px] font-bold uppercase text-slate-400 mb-2">
+            Client files
+          </p>
           <ul className="space-y-2">
             {attachments.map((file, i) => (
               <li key={file.url || i}>
