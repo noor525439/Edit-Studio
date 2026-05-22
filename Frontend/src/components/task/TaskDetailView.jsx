@@ -442,7 +442,7 @@ const TaskDetailView = ({
           <h2 className="font-black text-slate-900 mb-4 uppercase text-[10px] tracking-widest">
             Activity history
           </h2>
-          <ActivityTimeline activity={activity} />
+          <ActivityTimeline activity={activity} isAdmin={isAdmin} />
         </section>
 
         <section className="bg-white border border-slate-200 rounded-2xl p-6 mb-6">
@@ -453,6 +453,7 @@ const TaskDetailView = ({
             orderId={order._id}
             comments={comments}
             onPosted={onCommentPosted}
+            isAdmin={isAdmin}
           />
         </section>
 

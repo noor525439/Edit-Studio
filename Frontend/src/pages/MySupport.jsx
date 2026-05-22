@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getData } from '@/context/userContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -31,9 +32,52 @@ const StatusBadge = ({ status }) => {
 
 const fmt = (d) => new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
+const getSenderInfo = ({ reply, message, currentUser }) => {
+  const currentUserId = String(currentUser?._id || '').trim();
+  const replyById = String(reply?.replyBy?._id || reply?.replyBy || '').trim();
+  const replyRole = String(reply?.replyByRole || reply?.senderRole || message?.senderRole || 'support')
+    .trim()
+    .toLowerCase();
+  const replyName =
+    reply?.replyBy?.username ||
+    [reply?.replyBy?.firstName, reply?.replyBy?.lastName]
+      .filter(Boolean)
+      .join(' ') ||
+    reply?.senderName ||
+    message?.senderName ||
+    (replyRole === 'admin'
+      ? 'Admin'
+      : replyRole === 'editor'
+      ? 'Editor'
+      : replyRole === 'client'
+      ? 'Client'
+      : 'Support');
+  const isOwnMessage = currentUserId !== '' && replyById !== '' && currentUserId === replyById;
+  return { isOwnMessage, replyRole, replyName };
+};
+
+const getMessageHeader = ({ reply, message, currentUser }) => {
+  const { isOwnMessage, replyRole, replyName } = getSenderInfo({ reply, message, currentUser });
+  if (isOwnMessage) return 'You';
+  const roleLabel = replyRole
+    ? replyRole.charAt(0).toUpperCase() + replyRole.slice(1)
+    : 'Support';
+  return `${replyName} • ${roleLabel}`;
+};
+
+const getBubbleClasses = (isOwnMessage) => ({
+  wrapper: isOwnMessage ? 'flex justify-end pl-8' : 'flex justify-start pr-8',
+  bubble: isOwnMessage
+    ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-md'
+    : 'bg-white/5 text-slate-200 rounded-2xl rounded-tl-none px-4 py-2.5 border border-white/10',
+  header: isOwnMessage
+    ? 'text-[10px] font-semibold text-indigo-300 uppercase tracking-wide mb-1'
+    : 'text-[10px] font-semibold text-emerald-300 uppercase tracking-wide mb-1',
+});
+
 // ── Empty state ────────────────────────────────────────────────────────────
 const EmptyState = ({ onNew }) => (
-  <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white/[0.03] border border-white/10 rounded-2xl shadow-xl">
+  <div className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white/3 border border-white/10 rounded-2xl shadow-xl">
     <div className="relative w-16 h-16 mx-auto mb-5 flex items-center justify-center">
       <div className="absolute inset-0 bg-indigo-500/20 rounded-2xl blur-xl" />
       <div className="relative w-full h-full bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400">
@@ -50,6 +94,7 @@ const EmptyState = ({ onNew }) => (
 
 // ── Message detail panel ───────────────────────────────────────────────────
 const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
+  const { user: currentUser } = getData();
   const repliesEndRef = useRef(null);
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
@@ -66,8 +111,9 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
       await axios.post(`${API_URL}/api/support/my-messages/${msg._id}/reply`, { message: replyText }, { headers: { Authorization: `Bearer ${token}` } });
       setReplyText('');
       if (onReplySubmitted) onReplySubmitted();
-    } catch (err) {
+    } catch (error) {
       setReplyError('Failed to send message. Please try again.');
+      console.error(error);
     } finally { setSending(false); }
   };
 
@@ -112,33 +158,33 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
         {/* Replies Thread */}
         {msg.replies?.length > 0 ? (
           msg.replies.map((reply, i) => {
-           const isAdmin = reply.isAdminReply === true;
+            const { isOwnMessage } = getSenderInfo({
+              reply,
+              message: msg,
+              currentUser,
+            });
+            const header = getMessageHeader({
+              reply,
+              message: msg,
+              currentUser,
+            });
+            const classes = getBubbleClasses(isOwnMessage);
+
             return (
-              <div key={i} className={`flex ${!isAdmin ? 'justify-end pl-8' : 'justify-start pr-8'}`}>
+              <div key={i} className={classes.wrapper}>
                 <div className="max-w-full">
-                  {isAdmin ? (
-                    <>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Support Agent</span>
-                      </div>
-                      <div className="bg-white/5 border border-white/10 rounded-2xl rounded-tl-none px-4 py-2.5 text-slate-200">
-                        <p className="text-xs whitespace-pre-wrap leading-relaxed">{reply.replyMessage}</p>
-                      </div>
-                      <p className="text-slate-500 text-[10px] mt-1 pl-1">{fmt(reply.replyedAt)}</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="bg-indigo-600 text-white rounded-2xl rounded-tr-none px-4 py-2.5 shadow-md">
-                        <p className="text-xs whitespace-pre-wrap leading-relaxed">{reply.replyMessage}</p>
-                      </div>
-                      <div className="flex items-center justify-end gap-1.5 mt-1">
-                        <span className="text-[10px] font-semibold text-indigo-400">You</span>
-                        <span className="text-slate-600 text-[10px]">•</span>
-                        <span className="text-slate-500 text-[10px]">{fmt(reply.replyedAt)}</span>
-                      </div>
-                    </>
-                  )}
+                  <p className={classes.header}>{header}</p>
+                  <div className={classes.bubble}>
+                    <p className="text-xs whitespace-pre-wrap leading-relaxed">
+                      {reply.replyMessage}
+                    </p>
+                  </div>
+                  <div className={`mt-1.5 flex items-center gap-1.5 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                    {!isOwnMessage && <span className="text-[10px] text-emerald-300">•</span>}
+                    <span className="text-slate-500 text-[10px]">
+                      {fmt(reply.replyedAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -162,7 +208,7 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
             value={replyText} onChange={(e) => setReplyText(e.target.value)}
             placeholder={msg.status === 'closed' ? "Ticket is closed" : "Type your message here..."}
             disabled={msg.status === 'closed'} rows={2}
-            className="flex-1 text-xs bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 rounded-xl px-3 py-2 resize-none outline-none text-white disabled:bg-white/[0.02] disabled:text-slate-600 transition-all custom-scroll"
+            className="flex-1 text-xs bg-white/5 border border-white/10 focus:border-indigo-500/50 focus:bg-indigo-500/5 rounded-xl px-3 py-2 resize-none outline-none text-white disabled:bg-white/2 disabled:text-slate-600 transition-all custom-scroll"
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendReply(e); } }}
           />
           <button type="submit" disabled={sending || !replyText.trim() || msg.status === 'closed'} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 text-white disabled:text-slate-500 rounded-xl text-xs font-semibold h-9 flex items-center justify-center transition-all shrink-0 active:scale-95 shadow-md">
@@ -178,7 +224,7 @@ const MessageDetail = ({ msg, onClose, onReplySubmitted }) => {
 const MessageCard = ({ msg, isActive, onClick }) => {
   const hasUnread = msg.replies?.some(r => !r.isRead);
   return (
-    <button onClick={onClick} className={`w-full text-left p-4 rounded-xl border transition-all relative group outline-none ${isActive ? 'bg-indigo-500/10 border-indigo-500/50 shadow-lg shadow-black/20' : 'bg-white/[0.02] border-white/10 hover:bg-white/[0.05] hover:border-white/20'}`}>
+    <button onClick={onClick} className={`w-full text-left p-4 rounded-xl border transition-all relative group outline-none ${isActive ? 'bg-indigo-500/10 border-indigo-500/50 shadow-lg shadow-black/20' : 'bg-white/2 border-white/10 hover:bg-white/5 hover:border-white/20'}`}>
       {hasUnread && <span className="absolute top-4 left-2 w-1.5 h-1.5 rounded-full bg-indigo-400" />}
       <div className={`flex items-start justify-between gap-3 mb-1.5 ${hasUnread ? 'pl-2' : ''}`}>
         <p className={`text-xs font-bold truncate flex-1 group-hover:text-indigo-400 transition-colors ${isActive ? 'text-white' : 'text-slate-200'}`}>{msg.subject}</p>
@@ -205,20 +251,37 @@ const MySupport = () => {
   const [showDetail, setShowDetail] = useState(false);
   const token = localStorage.getItem('accessToken');
 
-  const fetchMessages = async (isRefreshed = false) => {
+  const fetchMessages = React.useCallback(async (isRefreshed = false) => {
     try {
       if (!isRefreshed) setLoading(true);
       setError('');
-      const res = await axios.get(`${API_URL}/api/support/my-messages`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get(`${API_URL}/api/support/my-messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = res.data.data || [];
       setMessages(data);
-      if (data.length > 0) setSelected(selected ? (data.find(m => m._id === selected._id) || data[0]) : data[0]);
-    } catch (err) {
+      if (data.length > 0) {
+        setSelected((prevSelected) =>
+          prevSelected
+            ? data.find((m) => m._id === prevSelected._id) || data[0]
+            : data[0],
+        );
+      }
+    } catch (error) {
+      console.error(error);
       setError('Failed to load your messages. Please try again.');
-    } finally { setLoading(false); }
-  };
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
-  useEffect(() => { if (!token) { navigate('/login'); return; } fetchMessages(); }, []);
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    fetchMessages();
+  }, [fetchMessages, navigate, token]);
 
   return (
     <section className="min-h-screen w-full bg-[#080c14] text-slate-300 p-4 relative overflow-hidden antialiased flex flex-col items-center justify-center">
@@ -250,8 +313,8 @@ const MySupport = () => {
 
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <div className="space-y-3.5">{[...Array(3)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-white/[0.02] border border-white/10 animate-pulse" />)}</div>
-            <div className="lg:col-span-2 h-[65vh] rounded-xl bg-white/[0.02] border border-white/10 animate-pulse" />
+            <div className="space-y-3.5">{[...Array(3)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-white/2 border border-white/10 animate-pulse" />)}</div>
+            <div className="lg:col-span-2 h-[65vh] rounded-xl bg-white/2 border border-white/10 animate-pulse" />
           </div>
         ) : messages.length === 0 ? (
           <EmptyState onNew={() => navigate('/contact-admin')} />
@@ -259,7 +322,7 @@ const MySupport = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
             {/* Tickets Sidebar Queue */}
             <div className={`lg:block ${showDetail ? 'hidden' : 'block'}`}>
-              <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-3 space-y-2 max-h-[68vh] overflow-y-auto custom-scroll shadow-2xl shadow-black/50">
+              <div className="bg-white/3 border border-white/10 rounded-2xl p-3 space-y-2 max-h-[68vh] overflow-y-auto custom-scroll shadow-2xl shadow-black/50">
                 <div className="flex items-center justify-between px-1.5 py-1 mb-2">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tickets Inbox</span>
                   <span className="text-[10px] font-bold bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-slate-300">{messages.length} Total</span>
@@ -273,12 +336,12 @@ const MySupport = () => {
             {/* Conversation Window */}
             <div className={`lg:col-span-2 lg:block ${showDetail ? 'block' : 'hidden'}`}>
               {selected ? (
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 sm:p-6 h-[68vh] flex flex-col shadow-2xl shadow-black/50 relative">
+                <div className="bg-white/3 border border-white/10 rounded-2xl p-5 sm:p-6 h-[68vh] flex flex-col shadow-2xl shadow-black/50 relative">
                   <button onClick={() => setShowDetail(false)} className="lg:hidden flex items-center gap-1.5 text-slate-400 hover:text-white text-[11px] font-bold mb-4 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10 transition-colors w-fit">← Back to Inbox</button>
                   <MessageDetail msg={selected} onClose={() => setShowDetail(false)} onReplySubmitted={() => fetchMessages(true)} />
                 </div>
               ) : (
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl flex flex-col items-center justify-center h-[68vh] text-center p-6">
+                <div className="bg-white/3 border border-white/10 rounded-2xl flex flex-col items-center justify-center h-[68vh] text-center p-6">
                   <p className="text-slate-500 text-xs">Select a conversation thread from the list to display contents</p>
                 </div>
               )}

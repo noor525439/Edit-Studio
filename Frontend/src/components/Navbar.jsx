@@ -38,6 +38,10 @@ const Navbar = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token && user) connectSocket(token);
+    const socket = connectSocket(localStorage.getItem("accessToken"));
+    if (socket && user?.role === 'admin') {
+      socket.emit('join_admin_room', 'admin');
+    }
   }, [user]);
 
   const logoutHandler = async () => {

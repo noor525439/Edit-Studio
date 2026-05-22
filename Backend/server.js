@@ -5,6 +5,7 @@ import userRoute from "./routes/userRoute.js"
 import workflowRoute, { reviewApiRouter } from "./routes/workflowRoute.js"
 import usersApiRoute from "./routes/usersApiRoute.js"
 import supportRoute from "./routes/supportRoute.js"
+import notificationRoute from "./routes/notificationRoute.js";
 import cors from 'cors'
 import http from "http";
 import { Server } from "socket.io";
@@ -55,6 +56,7 @@ app.use('/api/users', usersApiRoute)
 app.use('/workflow', workflowRoute)
 app.use('/api/reviews', reviewApiRouter)
 app.use('/api/support', supportRoute)
+app.use('/workflow/notifications', notificationRoute);
 
 
 

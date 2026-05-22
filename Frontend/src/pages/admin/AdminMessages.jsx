@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import { getData } from "@/context/userContext";
 
 const AdminMessages = () => {
   const [messages, setMessages] = useState([]);
@@ -18,31 +19,34 @@ const AdminMessages = () => {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
   const authToken = localStorage.getItem("accessToken");
 
-  const fetchMessages = async (page = 1) => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (filters.status !== "all") params.append("status", filters.status);
-      if (filters.priority !== "all")
-        params.append("priority", filters.priority);
-      if (filters.searchTerm) params.append("searchTerm", filters.searchTerm);
-      params.append("page", page);
-      params.append("limit", 10);
+  const fetchMessages = useCallback(
+    async (page = 1) => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (filters.status !== "all") params.append("status", filters.status);
+        if (filters.priority !== "all")
+          params.append("priority", filters.priority);
+        if (filters.searchTerm) params.append("searchTerm", filters.searchTerm);
+        params.append("page", page);
+        params.append("limit", 10);
 
-      const response = await axios.get(
-        `${API_URL}/api/support?${params.toString()}`,
-        { headers: { Authorization: `Bearer ${authToken}` } },
-      );
-      setMessages(response.data.data);
-      setMessagePage(page);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const response = await axios.get(
+          `${API_URL}/api/support?${params.toString()}`,
+          { headers: { Authorization: `Bearer ${authToken}` } },
+        );
+        setMessages(response.data.data);
+        setMessagePage(page);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [API_URL, authToken, filters],
+  );
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await axios.get(
         `${API_URL}/api/support/stats/dashboard`,
@@ -52,12 +56,12 @@ const AdminMessages = () => {
     } catch (error) {
       console.error("Error fetching stats:", error);
     }
-  };
+  }, [API_URL, authToken]);
 
   useEffect(() => {
     fetchMessages();
     fetchStats();
-  }, [filters]);
+  }, [filters, fetchMessages, fetchStats]);
 
   const handleSendReply = async () => {
     if (!replyText.trim() || !selectedMessage) return;
@@ -132,6 +136,68 @@ const AdminMessages = () => {
     };
     return colors[priority] || colors["medium"];
   };
+
+  const { user: currentUser } = getData();
+  const getSenderInfo = ({ reply, message, currentUser }) => {
+    const currentUserId = String(currentUser?._id || "").trim();
+    const replyById = String(
+      reply?.replyBy?._id || reply?.replyBy || "",
+    ).trim();
+    const replyRole = String(reply?.replyByRole || reply?.senderRole || "support")
+      .trim()
+      .toLowerCase();
+    const replyName =
+      reply?.replyBy?.username ||
+      [reply?.replyBy?.firstName, reply?.replyBy?.lastName]
+        .filter(Boolean)
+        .join(" ") ||
+      reply?.senderName ||
+      message?.senderName ||
+      (replyRole === "admin"
+        ? "Admin"
+        : replyRole === "editor"
+        ? "Editor"
+        : replyRole === "client"
+        ? "Client"
+        : "Support");
+
+    const idMatch =
+      currentUserId !== "" && replyById !== "" && currentUserId === replyById;
+
+    const roleMatch = replyRole === "admin" && currentUser?.role === "admin";
+
+    return {
+      isOwnMessage: idMatch || roleMatch,
+      replyRole,
+      replyName,
+    };
+  };
+
+  const getMessageHeader = ({ reply, message, currentUser }) => {
+    const { isOwnMessage, replyRole, replyName } = getSenderInfo({
+      reply,
+      message,
+      currentUser,
+    });
+
+    if (isOwnMessage) return "You (Admin)";
+
+    const roleLabel = replyRole
+      ? replyRole.charAt(0).toUpperCase() + replyRole.slice(1)
+      : "Support";
+
+    return `${replyName} • ${roleLabel}`;
+  };
+
+  const getBubbleClasses = (isOwnMessage) => ({
+    wrapper: isOwnMessage ? "flex justify-end pl-8" : "flex justify-start pr-8",
+    bubble: isOwnMessage
+      ? "bg-indigo-50 border border-indigo-200 rounded p-4 ml-auto"
+      : "bg-slate-50 border border-slate-100 rounded p-4",
+    header: isOwnMessage
+      ? "font-semibold text-indigo-700 text-sm mb-2"
+      : "font-semibold text-slate-700 text-sm mb-2",
+  });
 
   return (
     <>
@@ -382,38 +448,53 @@ const AdminMessages = () => {
                           Replies
                         </h3>
                         <div className="space-y-4">
-                          {selectedMessage.replies.map((reply, idx) => (
-                            <div
-                              key={idx}
-                              className="bg-slate-50 border border-slate-100 rounded p-4"
-                            >
-                              <p className="font-semibold text-slate-700 text-sm">
-                                Admin Reply
-                              </p>
-                              <p className="text-slate-800 mt-2 whitespace-pre-wrap">
-                                {reply.replyMessage}
-                              </p>
-                              <p className="text-slate-400 text-xs mt-2">
-                                {new Date(reply.replyedAt).toLocaleString()}
-                              </p>
-                              {reply.attachments &&
-                                reply.attachments.length > 0 && (
-                                  <div className="mt-2 space-y-1">
-                                    {reply.attachments.map((att, attIdx) => (
-                                      <a
-                                        key={attIdx}
-                                        href={att.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-2 text-indigo-600 text-xs font-medium"
-                                      >
-                                        📎 {att.filename}
-                                      </a>
-                                    ))}
+                          {selectedMessage.replies.map((reply, idx) => {
+                            const { isOwnMessage } = getSenderInfo({
+                              reply,
+                              message: selectedMessage,
+                              currentUser,
+                            });
+                            const header = getMessageHeader({
+                              reply,
+                              message: selectedMessage,
+                              currentUser,
+                            });
+                            const classes = getBubbleClasses(isOwnMessage);
+
+                            return (
+                              <div key={idx} className={classes.wrapper}>
+                                <div className="max-w-[85%]">
+                                  <p className={classes.header}>{header}</p>
+                                  <div className={classes.bubble}>
+                                    <p className="text-slate-800 whitespace-pre-wrap">
+                                      {reply.replyMessage}
+                                    </p>
                                   </div>
-                                )}
-                            </div>
-                          ))}
+                                  <p className="text-slate-400 text-xs mt-2">
+                                    {new Date(reply.replyedAt).toLocaleString()}
+                                  </p>
+                                  {reply.attachments &&
+                                    reply.attachments.length > 0 && (
+                                      <div className="mt-2 space-y-1">
+                                        {reply.attachments.map(
+                                          (att, attIdx) => (
+                                            <a
+                                              key={attIdx}
+                                              href={att.fileUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-2 text-indigo-600 text-xs font-medium"
+                                            >
+                                              📎 {att.filename}
+                                            </a>
+                                          ),
+                                        )}
+                                      </div>
+                                    )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
