@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [filterEditorId, setFilterEditorId] = useState("");
   const [filterProjectId, setFilterProjectId] = useState("");
   const [filterRating, setFilterRating] = useState("");
+  const [releasingId, setReleasingId] = useState(null); 
 
   const getAuthHeader = useCallback(() => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
@@ -38,7 +39,6 @@ const AdminDashboard = () => {
         axios.get('http://localhost:3000/user/all-editors', getAuthHeader()),
         axios.get('http://localhost:3000/workflow/admin/commissions', getAuthHeader())
       ]);
-
       setPendingEditors(pendingRes.data.editors || []);
       setAllProfiles(profilesRes.data.data || []);
       setCommissionOverview(commissionRes.data.data || {
@@ -124,24 +124,47 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleReleasePayout = async (paymentId) => {
+    setReleasingId(paymentId);
+    try {
+      const { data } = await axios.post(
+        `http://localhost:3000/workflow/admin/payments/${paymentId}/release`,
+        {},
+        getAuthHeader()
+      );
+      if (data.success) {
+        toast.success(data.message || "Payout released!");
+        fetchDashboardData();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Release failed");
+    } finally {
+      setReleasingId(null);
+    }
+  };
+
   if (loading) return <LoadingSpinner message="Securing Session..." />;
   if (!user || user.role !== "admin") return <Navigate to="/" />;
 
   const pendingPayments = commissionOverview.payments?.filter(p => p.status === 'pending') || [];
 
+  const pendingPayouts = commissionOverview.payments?.filter(
+    p => p.status === 'completed' && !p.editorPaidOut && p.editorId
+  ) || [];
+
   return (
     <div className="min-h-screen bg-[#f8fafc]">
-      <div className="max-w-6xl mx-auto py-8">
-        
+      <div className="max-w-6xl mx-auto py-8 px-4">
+
         <div className="mb-10 text-center sm:text-left">
           <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Admin Control Panel</h1>
           <p className="text-slate-500 mt-2 text-lg">Platform revenue and management overview</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          <StatCard label="Total Volume" value={commissionOverview.totals.totalVolume} icon={<TrendingUp size={22}/>} color="bg-emerald-50 text-emerald-600 border-emerald-100" />
-          <StatCard label="Admin Profit" value={commissionOverview.totals.totalAdminCommission} icon={<Wallet size={22}/>} color="bg-indigo-50 text-indigo-600 border-indigo-100" />
-          <StatCard label="Total Payouts" value={commissionOverview.totals.totalEditorPayout} icon={<DollarSign size={22}/>} color="bg-amber-50 text-amber-600 border-amber-100" />
+          <StatCard label="Total Volume"   value={commissionOverview.totals.totalVolume}          icon={<TrendingUp size={22}/>} color="bg-emerald-50 text-emerald-600 border-emerald-100" />
+          <StatCard label="Admin Profit"   value={commissionOverview.totals.totalAdminCommission} icon={<Wallet size={22}/>}     color="bg-indigo-50 text-indigo-600 border-indigo-100" />
+          <StatCard label="Total Payouts"  value={commissionOverview.totals.totalEditorPayout}    icon={<DollarSign size={22}/>} color="bg-amber-50 text-amber-600 border-amber-100" />
         </div>
 
         <div className="space-y-12">
@@ -164,7 +187,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex items-center gap-6">
                         <span className="font-bold text-slate-900 text-lg">PKR {payment.totalAmount.toLocaleString()}</span>
-                        <button 
+                        <button
                           onClick={() => handlePaymentApprove(payment._id)}
                           className="px-5 py-2 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-black transition-all shadow-sm hover:shadow-md"
                         >
@@ -177,6 +200,51 @@ const AdminDashboard = () => {
               )}
             </div>
           </section>
+
+          <section className="space-y-6">
+            <SectionHeader icon={<Wallet size={20} className="text-violet-600"/>} title="Editor Payout Release" count={pendingPayouts.length} />
+            <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+              {pendingPayouts.length === 0 ? (
+                <div className="p-16 text-center text-slate-400 font-medium">No pending editor payouts.</div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {pendingPayouts.map(payment => (
+                    <div key={payment._id} className="p-5 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-50 transition-colors">
+                      <div className="space-y-1.5">
+                        <p className="font-semibold text-slate-800">{payment.orderId?.projectTitle || "Project"}</p>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                          <span>Editor: <span className="text-slate-800">{payment.editorId?.username || "—"}</span></span>
+                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                          <span>{new Date(payment.paidAt || payment.createdAt).toLocaleDateString('en-GB')}</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[11px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-md font-semibold">
+                            Editor gets: PKR {Number(payment.editorPayoutAmount || 0).toLocaleString()}
+                          </span>
+                          <span className="text-[11px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-semibold">
+                            Admin kept: PKR {Number(payment.adminCommissionAmount || 0).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="font-bold text-slate-900 text-lg">
+                          PKR {Number(payment.totalAmount || 0).toLocaleString()}
+                        </span>
+                        <button
+                          onClick={() => handleReleasePayout(payment._id)}
+                          disabled={releasingId === payment._id}
+                          className="px-5 py-2 bg-violet-600 text-white text-xs font-semibold rounded-xl hover:bg-violet-700 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {releasingId === payment._id ? "Releasing..." : "Payout"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
           <section className="space-y-6">
             <SectionHeader icon={<UserPlus size={20} className="text-amber-600"/>} title="Pending Editor Requests" count={pendingEditors.length} />
             <div className="grid gap-4">
@@ -217,7 +285,7 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm grid grid-cols-1 md:grid-cols-4 gap-3">
-              <input className="border border-slate-200 rounded-xl px-3 py-2 text-sm" placeholder="Filter by editor ID" value={filterEditorId} onChange={(e) => setFilterEditorId(e.target.value)} />
+              <input className="border border-slate-200 rounded-xl px-3 py-2 text-sm" placeholder="Filter by editor ID"  value={filterEditorId}  onChange={(e) => setFilterEditorId(e.target.value)} />
               <input className="border border-slate-200 rounded-xl px-3 py-2 text-sm" placeholder="Filter by project ID" value={filterProjectId} onChange={(e) => setFilterProjectId(e.target.value)} />
               <select className="border border-slate-200 rounded-xl px-3 py-2 text-sm" value={filterRating} onChange={(e) => setFilterRating(e.target.value)}>
                 <option value="">All ratings</option>
@@ -236,7 +304,9 @@ const AdminDashboard = () => {
                     <div key={r._id} className="p-5 flex flex-wrap items-start justify-between gap-4 hover:bg-slate-50">
                       <div className="min-w-[200px]">
                         <p className="font-semibold text-slate-800">{r.clientName || r.clientId?.username || "Client"}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Editor: {r.editorId?.username || "—"} · Project: {r.orderId?.projectTitle || r.projectId?.projectTitle || "—"}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Editor: {r.editorId?.username || "—"} · Project: {r.orderId?.projectTitle || r.projectId?.projectTitle || "—"}
+                        </p>
                         <div className="mt-2"><StarRating value={r.rating} readonly size={16} /></div>
                         <p className="text-sm text-slate-600 mt-2 italic">&quot;{r.comment || r.feedback}&quot;</p>
                         <p className="text-[11px] text-slate-400 mt-1">{new Date(r.createdAt).toLocaleDateString()}</p>
@@ -273,23 +343,27 @@ const SectionHeader = ({ icon, title, count }) => (
 );
 
 const PendingCard = ({ editor, onAction }) => {
-  const documentUrl = editor.document ? `http://localhost:3000/${editor.document.replace(/\\/g, '/')}` : null;
+  const documentUrl = editor.document
+    ? `http://localhost:3000/${editor.document.replace(/\\/g, '/')}`
+    : null;
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
       <div className="flex items-center gap-4">
-        <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xl font-bold shadow-lg uppercase">{editor.username?.charAt(0)}</div>
+        <div className="h-12 w-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xl font-bold shadow-lg uppercase">
+          {editor.username?.charAt(0)}
+        </div>
         <div>
           <h3 className="font-semibold text-slate-900">{editor.username}</h3>
           <p className="text-xs text-slate-400 font-medium mb-2">{editor.email}</p>
           {documentUrl && (
-            <a href={documentUrl} target="_blank" className="text-[11px] font-semibold text-indigo-600 flex items-center gap-1.5 hover:text-indigo-800 transition-colors">
+            <a href={documentUrl} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-indigo-600 flex items-center gap-1.5 hover:text-indigo-800 transition-colors">
               <FileText size={14}/> VIEW IDENTITY DOCUMENT
             </a>
           )}
         </div>
       </div>
       <div className="flex gap-3">
-        <button onClick={() => onAction(editor._id, 'reject')} className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><X size={22}/></button>
+        <button onClick={() => onAction(editor._id, 'reject')}  className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><X size={22}/></button>
         <button onClick={() => onAction(editor._id, 'approve')} className="p-3 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Check size={22}/></button>
       </div>
     </div>
@@ -305,14 +379,14 @@ const WideProfileRow = ({ profile }) => (
       <div>
         <h4 className="font-semibold text-slate-900">{profile.username || profile.name}</h4>
         <div className="flex items-center gap-3 text-xs text-slate-500 font-medium mt-0.5">
-           <span className="flex items-center gap-1"><Briefcase size={12}/> {profile.experience || 'New'} Exp</span>
-           <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-           <span className="text-indigo-600">Active Editor</span>
+          <span className="flex items-center gap-1"><Briefcase size={12}/> {profile.experience || 'New'} Exp</span>
+          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+          <span className="text-indigo-600">Active Editor</span>
         </div>
       </div>
     </div>
     <div className="flex gap-2">
-      {profile.skills?.slice(0,3).map((s) => (
+      {profile.skills?.slice(0, 3).map((s) => (
         <span key={`${profile._id}-${s}`} className="text-[10px] bg-slate-100 px-3 py-1.5 rounded-lg text-slate-600 font-semibold uppercase tracking-wider border border-slate-50">{s}</span>
       ))}
     </div>

@@ -4,7 +4,7 @@ const paymentSchema = new mongoose.Schema(
   {
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProjectOrder", 
+      ref: "ProjectOrder",
       required: true,
     },
     clientId: {
@@ -46,7 +46,6 @@ const paymentSchema = new mongoose.Schema(
       default: "stripe_card",
     },
 
-  
     adminCommissionPercent: {
       type: Number,
       default: 20,
@@ -58,6 +57,15 @@ const paymentSchema = new mongoose.Schema(
     editorPayoutAmount: {
       type: Number,
       default: 0,
+    },
+    
+    editorPaidOut: {
+      type: Boolean,
+      default: false,
+    },
+    editorPaidOutAt: {
+      type: Date,
+      default: null,
     },
 
     status: {
@@ -85,8 +93,10 @@ const paymentSchema = new mongoose.Schema(
 
 paymentSchema.index({ orderId: 1 });
 paymentSchema.index({ clientId: 1 });
+paymentSchema.index({ editorId: 1 });         
 paymentSchema.index({ stripePaymentIntentId: 1 });
 paymentSchema.index({ stripeCheckoutSessionId: 1 });
+paymentSchema.index({ editorPaidOut: 1 });         
 
 const Payment = mongoose.models.Payment || mongoose.model("Payment", paymentSchema);
 export default Payment;

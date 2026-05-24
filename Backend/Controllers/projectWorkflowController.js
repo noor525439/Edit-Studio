@@ -2039,40 +2039,72 @@ export const stripeWebhook = async (req, res) => {
     const io = req.app.get("socketio");
 
     switch (event.type) {
-      case "payment_intent.succeeded": {
-        const intent = event.data.object;
-        const payment = await Payment.findOneAndUpdate(
-          { stripePaymentIntentId: intent.id },
-          {
-            status: "completed",
-            paidAt: new Date(),
-            receiptUrl: intent.charges?.data?.[0]?.receipt_url || null,
-          },
-          { new: true }
-        );
+  case "payment_intent.succeeded": {
+  const intent = event.data.object;
 
-        if (payment) {
-          const adminUser = await User.findOne({ role: "admin" }).sort({ createdAt: 1 });
-          if (adminUser) {
-            await User.updateOne(
-              { _id: adminUser._id },
-              { $inc: { adminWalletBalance: payment.adminCommissionAmount } }
-            );
-          }
-          if (payment.editorId) {
-            await User.updateOne(
-              { _id: payment.editorId },
-              { $inc: { editorPendingBalance: payment.editorPayoutAmount } }
-            );
-          }
+  const payment = await Payment.findOneAndUpdate(
+    { stripePaymentIntentId: intent.id },
+    {
+      status: "completed",
+      paidAt: new Date(),
+      receiptUrl: intent.charges?.data?.[0]?.receipt_url || null,
+    },
+    { new: true }
+  );
 
-          const order = await ProjectOrder.findById(payment.orderId);
-          const client = await User.findById(payment.clientId).select("username");
-          emitPaymentNotification(io, payment, order, client?.username);
-        }
-        break;
-      }
+  if (payment) {
+    const adminUser = await User.findOne({ role: "admin" }).sort({ createdAt: 1 });
+    if (adminUser) {
+      await User.updateOne(
+        { _id: adminUser._id },
+        { $inc: { adminWalletBalance: payment.adminCommissionAmount } }
+      );
+    }
+    if (payment.editorId) {
+      await User.updateOne(
+        { _id: payment.editorId },
+        { $inc: { editorPendingBalance: payment.editorPayoutAmount } }
+      );
+    }
 
+    const order = await ProjectOrder.findById(payment.orderId);
+    const client = await User.findById(payment.clientId).select("username");
+
+    await createNotification({
+      userId: payment.clientId,
+      type: "payment_completed",
+      title: "Payment Successful",
+      message: `PKR ${payment.totalAmount} has been paid for "${order?.projectTitle}".`,
+      orderId: payment.orderId,
+      io,
+    });
+
+    if (payment.editorId) {
+      await createNotification({
+        userId: payment.editorId,
+        type: "payment_received",
+        title: "Payment Received",
+        message: `PKR ${payment.editorPayoutAmount} is pending for "${order?.projectTitle}" and will be released by the admin.`,
+        orderId: payment.orderId,
+        io,
+      });
+    }
+
+    if (adminUser) {
+      await createNotification({
+        userId: adminUser._id,
+        type: "payment_received",
+        title: "Commission Received",
+        message: `PKR ${payment.adminCommissionAmount} commission (20%) received for "${order?.projectTitle}".`,
+        orderId: payment.orderId,
+        io,
+      });
+    }
+
+    emitPaymentNotification(io, payment, order, client?.username);
+  }
+  break;
+}
       case "payment_intent.payment_failed": {
         const intent = event.data.object;
         await Payment.findOneAndUpdate(
@@ -2139,6 +2171,67 @@ export const stripeWebhook = async (req, res) => {
   }
 };
 
+export const adminReleaseEditorPayout = async (req, res) => {
+  try {
+    const currentUser = await getCurrentUser(req, res);
+    if (!currentUser) return;
+    if (normalizeRole(currentUser.role) !== "admin") {
+      return res.status(403).json({ success: false, message: "Admin only" });
+    }
+
+    const { paymentId } = req.params;
+
+    const payment = await Payment.findById(paymentId)
+      .populate("editorId", "username email")
+      .populate("orderId", "projectTitle");
+
+    if (!payment) {
+      return res.status(404).json({ success: false, message: "Payment not found" });
+    }
+    if (payment.status !== "completed") {
+      return res.status(400).json({ success: false, message: "Payment has not been completed yet" });
+    }
+    if (payment.editorPaidOut) {
+      return res.status(400).json({ success: false, message: "Editor has already been paid out" });
+    }
+    if (!payment.editorId) {
+      return res.status(400).json({ success: false, message: "No editor assigned to this payment" });
+    }
+
+    await User.updateOne(
+      { _id: payment.editorId._id || payment.editorId },
+      {
+        $inc: {
+          editorPendingBalance: -payment.editorPayoutAmount,
+          editorReleasedBalance: payment.editorPayoutAmount,
+        },
+      }
+    );
+
+    payment.editorPaidOut = true;
+    payment.editorPaidOutAt = new Date();
+    await payment.save();
+
+    const io = req.app.get("io");
+    await createNotification({
+      userId: payment.editorId._id || payment.editorId,
+      type: "payment_released",
+      title: "Payment Released!",
+      message: `PKR ${payment.editorPayoutAmount} for "${payment.orderId?.projectTitle}" has been released to your account.`,
+      orderId: payment.orderId?._id,
+      io,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `PKR ${payment.editorPayoutAmount} successfully released to ${payment.editorId?.username}`,
+      data: payment,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const getPayments = async (req, res) => {
   try {
     const currentUser = await getCurrentUser(req, res);
@@ -2154,8 +2247,6 @@ export const getPayments = async (req, res) => {
       .populate("editorId", "username email")
       .populate("orderId", "projectTitle")
       .sort({ createdAt: -1 });
-
-    // Deleted the duplicate line that was here
     const data = payments.map((doc) => {
       const o = doc.toObject ? doc.toObject() : { ...doc };
       if (role === "editor") {

@@ -50,6 +50,7 @@ import {
   deleteReview,
   getAdminActivities,
   getAdminOverview,
+  adminReleaseEditorPayout
 } from "../Controllers/projectWorkflowController.js";
 import {
   getClientPublicProfile,
@@ -87,6 +88,7 @@ router.post("/payments/create-checkout-session",isAuthenticated,authorizeRole("c
 router.get("/payments", isAuthenticated, getPayments);
 router.post("/payments/:paymentId/refund",isAuthenticated,authorizeRole("admin"),refundPayment);
 router.patch("/payments/:paymentId/approve", isAuthenticated, approvePaymentManual);
+router.post("/admin/payments/:paymentId/release", isAuthenticated, authorizeRole("admin"), adminReleaseEditorPayout);
 
 router.get("/reviews", isAuthenticated, getReviews);
 router.post("/reviews", isAuthenticated, authorizeRole("client"), createReview);
