@@ -169,14 +169,11 @@ const ClientInfoCard = ({
           <ul className="space-y-2">
             {attachments.map((file, i) => (
               <li key={file.url || i}>
-                <a
-                  href={file.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm font-medium text-green-600 hover:underline"
+                <div
+                  className="text-sm font-medium"
                 >
                   {file.label || file.name || `Download file ${i + 1}`}
-                </a>
+                </div>
               </li>
             ))}
           </ul>

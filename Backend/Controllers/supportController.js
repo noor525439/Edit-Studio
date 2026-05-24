@@ -322,7 +322,6 @@ export const replySupportMessage = async (req, res) => {
     const { replyMessage } = req.body;
     const adminId = req.userId || req.user?.id || req.user?._id;
     const adminRole = req.userRole || req.user?.role || "admin";
-    console.log("adminId:", adminId, "adminRole:", adminRole);
     if (!replyMessage) {
       return res.status(400).json({
         success: false,

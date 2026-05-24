@@ -522,9 +522,6 @@ export const applyForProject = async (req, res) => {
 };
 
 export const instantHire = async (req, res) => {
-  console.log("🔍 instantHire called");
-  console.log("req.userId:", req.userId);
-  console.log("req.body:", req.body);
   try {
     let currentUser;
     const isUserEmail = String(req.userId || "").includes("@");
